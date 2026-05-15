@@ -25,14 +25,16 @@ Estructura base de un proyecto en capas (routers, services, repositories, models
 ## Setup
 
 ```bash
+# Si estas en \GitHub\InitialStructure> , hacer: cd backend
 python -m venv venv
 source venv/bin/activate          # Linux/Mac
-# venv\Scripts\activate            # Windows
+#  ./venv/Scripts/Activate.ps1    # Windows
+# Si es la primera vez que corres esto, ejecutar: Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
 
 pip install -r requirements.txt
 cp .env.example .env               # editá con tus credenciales
 
-uvicorn src.main:app --reload
+uvicorn src.app:app --reload
 ```
 
 Abrir http://localhost:8000/docs para ver Swagger.
