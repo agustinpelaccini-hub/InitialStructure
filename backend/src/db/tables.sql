@@ -4,7 +4,9 @@ CREATE TABLE clientes (
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
     direccion TEXT NOT NULL,
-    telefono VARCHAR(20) NOT NULL
+    telefono VARCHAR(20) NOT NULL,
+    role VARCHAR(20) DEFAULT 'cliente'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2. Entidad Restaurante

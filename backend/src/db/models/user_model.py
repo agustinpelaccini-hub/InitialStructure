@@ -1,15 +1,16 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, Datetime
 from sqlalchemy.sql import func
 
 from src.db.connection import Base
 
 
-class User(Base):
-    __tablename__ = "users"
+class Clientes(Base):
+    __tablename__ = "clientes"
 
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    age = Column(Integer, nullable=False)
-    is_admin = Column(Boolean, default=False)
-    created_at = Column(DateTime, server_default=func.now())
+    nombre = Column(String, nullable=False)
+    direccion = Column(String, nullable=False)
+    telefono = Column(Integer, nullable=False)
+    role = Column(String, default='cliente')
+    created_at = Column(String, default=func.now())
