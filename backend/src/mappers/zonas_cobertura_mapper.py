@@ -1,5 +1,5 @@
 from src.db.models.zonas_cobertura_model import ZonasCobertura
-from src.dtos.zonas_cobertura_dto import ZonasCoberturaResponseDTO
+from src.dtos.zona_cobertura_dto import ZonasCoberturaResponseDTO
 
 
 def to_zonas_cobertura_response(zona: ZonasCobertura) -> ZonasCoberturaResponseDTO:
