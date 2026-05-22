@@ -1,5 +1,5 @@
-from src.db.models.calificion_model import Restaurantes
-from src.dtos.calificacion_dto import RestaurantResponseDTO
+from src.db.models.calificacion_model import Calificaciones
+from src.dtos.calificacion_dto import CalificacionResponseDTO
 
 
 def to_calificacion_response(calificacion: Calificaciones) -> CalificacionResponseDTO:

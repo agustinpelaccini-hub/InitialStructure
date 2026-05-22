@@ -1,7 +1,7 @@
 from src.db.models.cupones_model import Cupones
-from src.dtos.cupones_dto import RestaurantResponseDTO
+from src.dtos.cupones_dto import CuponResponseDTO, CuponResponseDTOResponseDTO
 
 
-def to_cupones_response(cupones: Cupones) -> CuponesResponseDTO:
+def to_cupones_response(cupones: Cupones) -> CuponResponseDTO:
     """Convierte un Model SQLAlchemy en un DTO de respuesta (sin campos sensibles)."""
-    return CuponesResponseDTO.model_validate(cupones)
+    return CuponResponseDTO.model_validate(cupones)
