@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPedidos, mockClientes, mockRestaurantes, ESTADOS } from "@/lib/mock-data";
+import { useLatestPedidos, useCreatePedido, useAssignPedido } from "@/hooks/apiHooks";
 import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/pedidos")({
@@ -46,13 +47,24 @@ function PedidosPage() {
   // ========================================================
 
   const estados = ESTADOS;
+  const pedidosQuery = useLatestPedidos();
+  const createPedido = useCreatePedido();
+  const assignPedido = useAssignPedido();
+
+  const handleNewPedido = () => {
+    const cliente_id = mockClientes[0]?.id ?? 1;
+    const restaurante_id = mockRestaurantes[0]?.id ?? 1;
+    const items = [{ plato_id: 1, cantidad: 1 }];
+    const payload = { cliente_id, restaurante_id, direccion_entrega: "Calle Falsa 123", items };
+    createPedido.mutate(payload);
+  };
 
   return (
     <AppShell>
       <PageHeader
         title="Pedidos"
         subtitle="Historial completo y gestión de estados"
-        actions={<Button><Plus className="h-4 w-4" />Nuevo pedido</Button>}
+        actions={<Button onClick={handleNewPedido}><Plus className="h-4 w-4" />Nuevo pedido</Button>}
       />
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -80,7 +92,7 @@ function PedidosPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockPedidos.map(p => {
+              {(pedidosQuery.data ?? mockPedidos).map(p => {
                 const cli = mockClientes.find(c => c.id === p.cliente_id);
                 const rest = mockRestaurantes.find(r => r.id === p.restaurante_id);
                 return (
@@ -91,7 +103,10 @@ function PedidosPage() {
                     <TableCell className="text-muted-foreground text-sm">{new Date(p.fecha).toLocaleString()}</TableCell>
                     <TableCell><span className={`text-xs px-2 py-1 rounded-full font-medium ${estadoColor[p.estado]}`}>{p.estado.replace("_"," ")}</span></TableCell>
                     <TableCell className="text-right font-semibold">${p.total.toLocaleString()}</TableCell>
-                    <TableCell><Button variant="ghost" size="sm">Ver</Button></TableCell>
+                    <TableCell className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm">Ver</Button>
+                      <Button size="sm" variant="outline" onClick={() => assignPedido.mutate(p.id)}>Asignar</Button>
+                    </TableCell>
                   </TableRow>
                 );
               })}

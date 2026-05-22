@@ -3,6 +3,7 @@ import { AppShell, PageHeader, EndpointHint } from "@/components/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { mockRestaurantes, mockPlatos } from "@/lib/mock-data";
+import { usePlatosByRestaurant, useRestaurantes, useTogglePlato } from "@/hooks/apiHooks";
 import { ArrowLeft, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/restaurantes/$id")({
@@ -11,8 +12,11 @@ export const Route = createFileRoute("/restaurantes/$id")({
 
 function MenuPage() {
   const { id } = Route.useParams();
-  const restaurante = mockRestaurantes.find(r => r.id === Number(id));
-  const platos = mockPlatos.filter(p => p.restaurante_id === Number(id));
+  const restaurantesQuery = useRestaurantes();
+  const restaurante = (restaurantesQuery.data ?? mockRestaurantes).find(r => r.id === Number(id));
+  const platosQuery = usePlatosByRestaurant(Number(id));
+  const platos = platosQuery.data ?? mockPlatos.filter(p => p.restaurante_id === Number(id));
+  const togglePlato = useTogglePlato();
 
   // ============ ENDPOINTS — HU1 ============
   // GET /restaurantes/{id}            -> info del restaurante
@@ -52,9 +56,14 @@ function MenuPage() {
                 </div>
                 <div className="text-right">
                   <div className="font-black text-primary">${p.precio.toLocaleString()}</div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full mt-2 inline-block ${p.disponible ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                    {p.disponible ? "Disponible" : "No disponible"}
-                  </span>
+                  <div className="mt-2 flex flex-col items-end gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full inline-block ${p.disponible ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                      {p.disponible ? "Disponible" : "No disponible"}
+                    </span>
+                    <button className="text-sm text-muted-foreground underline" onClick={() => togglePlato.mutate({ id: p.id, disponible: !p.disponible })}>
+                      {p.disponible ? "Desactivar" : "Activar"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </CardContent>

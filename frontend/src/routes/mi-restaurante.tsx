@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPlatos, mockRestaurantes, mockPedidos } from "@/lib/mock-data";
 import { useRole } from "@/lib/role-context";
+import { usePlatosByRestaurant, useRestaurantes, useRestaurantePedidos, useCreatePlato } from "@/hooks/apiHooks";
 import { Plus } from "lucide-react";
+import * as React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/mi-restaurante")({
   component: MiRestaurante,
@@ -15,9 +21,39 @@ function MiRestaurante() {
   const { session } = useRole();
   const location = useLocation();
   const restId = session?.entidad_id;
-  const rest = mockRestaurantes.find(r => r.id === restId);
-  const platos = mockPlatos.filter(p => p.restaurante_id === restId);
-  const pedidos = mockPedidos.filter(p => p.restaurante_id === restId);
+  const restaurantesQuery = useRestaurantes();
+  const rest = (restaurantesQuery.data ?? mockRestaurantes).find(r => r.id === restId);
+  const platosQuery = usePlatosByRestaurant(restId);
+  const platos = platosQuery.data ?? mockPlatos.filter(p => p.restaurante_id === restId);
+  const pedidosQuery = useRestaurantePedidos(restId);
+  const pedidos = pedidosQuery.data ?? mockPedidos.filter(p => p.restaurante_id === restId);
+  const createPlato = useCreatePlato();
+  const [open, setOpen] = React.useState(false);
+  const [nombrePlato, setNombrePlato] = React.useState("");
+  const [precioPlato, setPrecioPlato] = React.useState<number | "">("");
+  const [descripcionPlato, setDescripcionPlato] = React.useState("");
+  const [disponiblePlato, setDisponiblePlato] = React.useState(true);
+
+  const handleNewPlato = () => {
+    setOpen(true);
+  };
+
+  const handleCreatePlato = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!restId || !nombrePlato) {
+      const { toast } = require("sonner");
+      toast.error("El nombre del plato es obligatorio");
+      return;
+    }
+    const precio = typeof precioPlato === "number" ? precioPlato : Number(precioPlato || 0);
+    const payload = { nombre: nombrePlato, descripcion: descripcionPlato, precio, disponible: disponiblePlato };
+    createPlato.mutate({ restId, payload });
+    setOpen(false);
+    setNombrePlato("");
+    setPrecioPlato("");
+    setDescripcionPlato("");
+    setDisponiblePlato(true);
+  };
 
   // ============ ENDPOINTS — RESTAURANTE (HU1, HU7, HU14) ============
   // GET  /restaurantes/{id}                 -> datos del local
@@ -43,7 +79,37 @@ function MiRestaurante() {
           actions={
             <>
               <Link to="/mi-restaurante/pedidos"><Button variant="outline">Pedidos recibidos ({pedidos.length})</Button></Link>
-              <Button><Plus className="h-4 w-4" />Nuevo plato</Button>
+              <Button onClick={handleNewPlato}><Plus className="h-4 w-4" />Nuevo plato</Button>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Nuevo plato</DialogTitle>
+                    <DialogDescription>Agrega un plato al menú de tu restaurante.</DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleCreatePlato} className="grid gap-3 py-4">
+                    <div>
+                      <Label>Nombre</Label>
+                      <Input value={nombrePlato} onChange={e => setNombrePlato(e.target.value)} />
+                    </div>
+                    <div>
+                      <Label>Precio</Label>
+                      <Input type="number" value={precioPlato} onChange={e => setPrecioPlato(e.target.value === "" ? "" : Number(e.target.value))} />
+                    </div>
+                    <div>
+                      <Label>Descripción</Label>
+                      <Input value={descripcionPlato} onChange={e => setDescripcionPlato(e.target.value)} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label>Disponible</Label>
+                      <Switch checked={disponiblePlato} onCheckedChange={(v: boolean) => setDisponiblePlato(v)} />
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit">Crear plato</Button>
+                      <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </>
           }
         />

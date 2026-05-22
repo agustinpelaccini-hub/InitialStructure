@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockPedidos, mockRestaurantes, mockClientes, mockRepartidores } from "@/lib/mock-data";
 import { useRole } from "@/lib/role-context";
 import { ShoppingBag, Store, Users, Bike, TrendingUp } from "lucide-react";
+import { useRestaurantesTop, useLatestPedidos } from "@/hooks/apiHooks";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -31,6 +32,9 @@ function Dashboard() {
   // GET /restaurantes/top  -> ranking general (HU10)
   // GET /pedidos?limit=10  -> últimos pedidos
   // ======================================================
+
+  const topQuery = useRestaurantesTop();
+  const pedidosQuery = useLatestPedidos(10);
 
   const stats = [
     { label: "Restaurantes", value: mockRestaurantes.length, icon: Store, color: "bg-orange-100 text-orange-700" },
@@ -60,18 +64,22 @@ function Dashboard() {
         <Card>
           <CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-4 w-4" />Top restaurantes</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {[...mockRestaurantes].sort((a,b)=>b.calificacion_promedio-a.calificacion_promedio).slice(0,5).map((r,i)=>(
-              <div key={r.id} className="flex items-center justify-between border-b last:border-0 pb-2">
-                <div className="flex items-center gap-3">
-                  <span className="font-black text-primary w-6">#{i+1}</span>
-                  <div>
-                    <div className="font-semibold">{r.nombre}</div>
-                    <div className="text-xs text-muted-foreground capitalize">{r.categoria}</div>
+            
+            {((topQuery.data ?? mockRestaurantes) as any[])
+              .sort((a,b)=> (b.calificacion_promedio ?? 0) - (a.calificacion_promedio ?? 0))
+              .slice(0,5)
+              .map((r,i)=>(
+                <div key={r.id} className="flex items-center justify-between border-b last:border-0 pb-2">
+                  <div className="flex items-center gap-3">
+                    <span className="font-black text-primary w-6">#{i+1}</span>
+                    <div>
+                      <div className="font-semibold">{r.nombre}</div>
+                      <div className="text-xs text-muted-foreground capitalize">{r.categoria}</div>
+                    </div>
                   </div>
+                  <div className="text-sm font-semibold">★ {r.calificacion_promedio}</div>
                 </div>
-                <div className="text-sm font-semibold">★ {r.calificacion_promedio}</div>
-              </div>
-            ))}
+              ))}
             <EndpointHint>GET {`{API_BASE_URL}`}/restaurantes/top</EndpointHint>
           </CardContent>
         </Card>
@@ -79,13 +87,13 @@ function Dashboard() {
         <Card>
           <CardHeader><CardTitle>Últimos pedidos</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            {mockPedidos.map(p => (
+            {(pedidosQuery.data ?? mockPedidos).map((p:any) => (
               <div key={p.id} className="flex items-center justify-between border-b last:border-0 pb-2">
                 <div>
                   <div className="font-semibold">Pedido #{p.id}</div>
-                  <div className="text-xs text-muted-foreground capitalize">{p.estado.replace("_"," ")}</div>
+                  <div className="text-xs text-muted-foreground capitalize">{String(p.estado || "").replace("_"," ")}</div>
                 </div>
-                <div className="font-semibold">${p.total.toLocaleString()}</div>
+                <div className="font-semibold">${(p.total ?? 0).toLocaleString()}</div>
               </div>
             ))}
             <EndpointHint>GET {`{API_BASE_URL}`}/pedidos?limit=10</EndpointHint>

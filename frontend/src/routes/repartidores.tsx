@@ -3,6 +3,7 @@ import { AppShell, PageHeader, EndpointHint } from "@/components/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { mockRepartidores } from "@/lib/mock-data";
+import { useRepartidores } from "@/hooks/apiHooks";
 import { Plus, Bike } from "lucide-react";
 
 export const Route = createFileRoute("/repartidores")({
@@ -21,6 +22,8 @@ function RepartidoresPage() {
   //   * Al entregar -> repartidor.disponible = true
   // ====================================================
 
+  const repartidoresQuery = useRepartidores();
+
   return (
     <AppShell>
       <PageHeader
@@ -30,7 +33,7 @@ function RepartidoresPage() {
       />
       <EndpointHint>GET {`{API_BASE_URL}`}/repartidores  ·  GET {`{API_BASE_URL}`}/repartidores/disponibles</EndpointHint>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-        {mockRepartidores.map(r => (
+        {(repartidoresQuery.data ?? mockRepartidores).map(r => (
           <Card key={r.id}>
             <CardContent className="p-5 flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center">

@@ -6,7 +6,9 @@ import { Switch } from "@/components/ui/switch";
 import { mockPedidos, mockClientes, mockRestaurantes, mockRepartidores } from "@/lib/mock-data";
 import { useRole } from "@/lib/role-context";
 import { useState } from "react";
+import { useRepartidorPedidos } from "@/hooks/apiHooks";
 import { MapPin, CheckCircle2 } from "lucide-react";
+import { useUpdatePedidoEstado, useToggleRepartidor } from "@/hooks/apiHooks";
 
 export const Route = createFileRoute("/mis-entregas")({
   component: MisEntregas,
@@ -16,6 +18,15 @@ function MisEntregas() {
   const { session } = useRole();
   const repartidor = mockRepartidores.find(r => r.id === session?.entidad_id);
   const [disponible, setDisponible] = useState(repartidor?.disponible ?? true);
+  const entregasQuery = useRepartidorPedidos(session?.entidad_id);
+  const entregas = entregasQuery.data ?? mockPedidos.filter(p => p.repartidor_id === session?.entidad_id);
+  const updateEstado = useUpdatePedidoEstado();
+  const toggleRep = useToggleRepartidor();
+
+  const handleToggleDisponible = (next: boolean) => {
+    setDisponible(next);
+    if (session?.entidad_id) toggleRep.mutate({ id: session.entidad_id, disponible: next });
+  };
 
   // ============ ENDPOINTS — REPARTIDOR (HU5, HU6) ============
   // GET   /repartidores/{rep_id}/pedidos           -> entregas asignadas (no entregadas)
@@ -25,7 +36,7 @@ function MisEntregas() {
   //   * Al entregar -> repartidor.disponible = true automáticamente
   // ============================================================
 
-  const entregas = mockPedidos.filter(p => p.repartidor_id === session?.entidad_id);
+  
 
   return (
     <AppShell>
@@ -34,9 +45,9 @@ function MisEntregas() {
           title="Mis entregas"
           subtitle={`Hola ${session?.nombre} · ${repartidor?.vehiculo}`}
           actions={
-            <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-card border">
+              <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-card border">
               <span className="text-sm font-medium">{disponible ? "Disponible" : "Ocupado"}</span>
-              <Switch checked={disponible} onCheckedChange={setDisponible} />
+              <Switch checked={disponible} onCheckedChange={handleToggleDisponible} />
             </div>
           }
         />
@@ -64,10 +75,10 @@ function MisEntregas() {
                     <div><strong>Entregar a:</strong> {cli?.nombre}</div>
                     <div className="flex items-start gap-1 text-muted-foreground"><MapPin className="h-3.5 w-3.5 mt-0.5" />{p.direccion_entrega}</div>
                   </div>
-                  <div className="flex gap-2 pt-2 border-t">
-                    <Button size="sm" variant="outline" className="flex-1">En camino</Button>
-                    <Button size="sm" className="flex-1"><CheckCircle2 className="h-4 w-4" />Entregar</Button>
-                  </div>
+                      <div className="flex gap-2 pt-2 border-t">
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => updateEstado.mutate({ id: p.id, estado: "en_camino" })}>En camino</Button>
+                        <Button size="sm" className="flex-1" onClick={() => updateEstado.mutate({ id: p.id, estado: "entregado" })}><CheckCircle2 className="h-4 w-4" />Entregar</Button>
+                      </div>
                 </CardContent>
               </Card>
             );

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, PageHeader, EndpointHint } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockRestaurantes, mockPlatos } from "@/lib/mock-data";
+import { useRestaurantesTop, usePlatosTop } from "@/hooks/apiHooks";
 import { Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/rankings")({
@@ -20,8 +21,11 @@ function RankingsPage() {
   //  GROUP BY r.id ORDER BY pedidos DESC LIMIT 5;
   // ===========================================
 
-  const topRest = [...mockRestaurantes].sort((a,b)=>b.calificacion_promedio-a.calificacion_promedio).slice(0,5);
-  const topPlatos = [...mockPlatos].slice(0,10);
+  const topRestQuery = useRestaurantesTop();
+  const topPlatosQuery = usePlatosTop();
+
+  const topRest = topRestQuery.data ?? [...mockRestaurantes].sort((a,b)=>b.calificacion_promedio-a.calificacion_promedio).slice(0,5);
+  const topPlatos = topPlatosQuery.data ?? [...mockPlatos].slice(0,10);
 
   return (
     <AppShell>

@@ -3,7 +3,10 @@ import { AppShell, PageHeader, EndpointHint } from "@/components/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { mockNotificaciones } from "@/lib/mock-data";
+import { useClienteNotificaciones } from "@/hooks/apiHooks";
+import { useRole } from "@/lib/role-context";
 import { Bell, Check } from "lucide-react";
+import { useMarkNotificacion } from "@/hooks/apiHooks";
 
 export const Route = createFileRoute("/notificaciones")({
   component: NotificacionesPage,
@@ -18,10 +21,14 @@ function NotificacionesPage() {
   // * Las transiciones inválidas NO generan notificación
   // ==========================================
 
-  const sorted = [...mockNotificaciones].sort((a,b)=> {
+  const { session } = useRole();
+  const notisQuery = useClienteNotificaciones(session?.entidad_id);
+  const sorted = [...(notisQuery.data ?? mockNotificaciones)].sort((a,b)=> {
     if (a.leida !== b.leida) return a.leida ? 1 : -1;
     return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
   });
+
+  const markMut = useMarkNotificacion();
 
   return (
     <AppShell>
@@ -38,7 +45,7 @@ function NotificacionesPage() {
                 <div className="font-semibold">Pedido #{n.pedido_id} → <span className="capitalize">{n.estado_nuevo.replace("_"," ")}</span></div>
                 <div className="text-xs text-muted-foreground">{new Date(n.fecha).toLocaleString()}</div>
               </div>
-              {!n.leida && <Button size="sm" variant="ghost"><Check className="h-4 w-4" />Marcar leída</Button>}
+              {!n.leida && <Button size="sm" variant="ghost" onClick={() => markMut.mutate({ id: n.id, leida: true })}><Check className="h-4 w-4" />Marcar leída</Button>}
             </CardContent>
           </Card>
         ))}

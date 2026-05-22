@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPedidos, mockRestaurantes } from "@/lib/mock-data";
 import { useRole } from "@/lib/role-context";
+import { useClientePedidos } from "@/hooks/apiHooks";
 import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/mis-pedidos")({
@@ -32,7 +33,8 @@ function MisPedidos() {
   // GET  /clientes/{cliente_id}/notificaciones      -> avisos de cambio de estado
   // ===============================================================
 
-  const pedidos = mockPedidos.filter(p => p.cliente_id === session?.entidad_id);
+  const pedidosQuery = useClientePedidos(session?.entidad_id);
+  const pedidos = pedidosQuery.data ?? mockPedidos.filter(p => p.cliente_id === session?.entidad_id);
 
   return (
     <AppShell>

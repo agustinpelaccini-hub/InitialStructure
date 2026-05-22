@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPedidos, mockClientes } from "@/lib/mock-data";
+import { useRestaurantePedidos, useUpdatePedidoEstado } from "@/hooks/apiHooks";
 import { useRole } from "@/lib/role-context";
 
 export const Route = createFileRoute("/mi-restaurante/pedidos")({
@@ -21,7 +22,9 @@ const estadoColor: Record<string, string> = {
 
 function PedidosRecibidos() {
   const { session } = useRole();
-  const pedidos = mockPedidos.filter(p => p.restaurante_id === session?.entidad_id);
+  const pedidosQuery = useRestaurantePedidos(session?.entidad_id);
+  const pedidos = pedidosQuery.data ?? mockPedidos.filter(p => p.restaurante_id === session?.entidad_id);
+  const updateEstado = useUpdatePedidoEstado();
 
   // ============ ENDPOINTS — RESTAURANTE (HU6, HU7) ============
   // GET   /restaurantes/{id}/pedidos          -> pedidos del local
@@ -58,8 +61,8 @@ function PedidosRecibidos() {
                     <TableCell><span className={`text-xs px-2 py-1 rounded-full font-medium ${estadoColor[p.estado]}`}>{p.estado.replace("_"," ")}</span></TableCell>
                     <TableCell className="text-right font-semibold">${p.total.toLocaleString()}</TableCell>
                     <TableCell className="space-x-2">
-                      <Button size="sm" variant="outline">Confirmar</Button>
-                      <Button size="sm" variant="ghost">Cancelar</Button>
+                        <Button size="sm" variant="outline" onClick={() => updateEstado.mutate({ id: p.id, estado: "confirmado" })}>Confirmar</Button>
+                        <Button size="sm" variant="ghost" onClick={() => updateEstado.mutate({ id: p.id, estado: "cancelado" })}>Cancelar</Button>
                     </TableCell>
                   </TableRow>
                 );

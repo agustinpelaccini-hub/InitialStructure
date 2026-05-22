@@ -3,6 +3,7 @@ import { AppShell, PageHeader, EndpointHint } from "@/components/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { mockCupones } from "@/lib/mock-data";
+import { useCupones } from "@/hooks/apiHooks";
 import { Plus, Ticket } from "lucide-react";
 
 export const Route = createFileRoute("/cupones")({
@@ -23,6 +24,8 @@ function CuponesPage() {
   //   * Si se cancela antes de confirmado, NO se cuenta
   // ===========================================
 
+  const cuponesQuery = useCupones();
+
   return (
     <AppShell>
       <PageHeader
@@ -32,7 +35,7 @@ function CuponesPage() {
       />
       <EndpointHint>GET {`{API_BASE_URL}`}/cupones  ·  POST {`{API_BASE_URL}`}/cupones/validar</EndpointHint>
       <div className="grid md:grid-cols-2 gap-4 mt-6">
-        {mockCupones.map(c => {
+        {(cuponesQuery.data ?? mockCupones).map(c => {
           const venc = new Date(c.vencimiento);
           const expirado = venc < new Date();
           const agotado = c.usos_actuales >= c.usos_maximos;

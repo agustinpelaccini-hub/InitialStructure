@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRole, type Role } from "@/lib/role-context";
+import { setAuthToken } from "@/lib/api";
 import { mockClientes, mockRepartidores, mockRestaurantes } from "@/lib/mock-data";
 import { Shield, User, Bike, Store } from "lucide-react";
 
@@ -20,6 +21,8 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const elegir = (rol: Role, entidad_id: number | null, nombre: string) => {
+    // Guardar sesión mock + token local (preparación para auth real)
+    setAuthToken("mock-token");
     login({ rol, entidad_id, nombre });
     navigate({ to: "/" });
   };

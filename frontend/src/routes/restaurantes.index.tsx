@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mockRestaurantes } from "@/lib/mock-data";
+import { useRestaurantes } from "@/hooks/apiHooks";
 import { Plus, Search } from "lucide-react";
 
 export const Route = createFileRoute("/restaurantes/")({
@@ -29,7 +30,9 @@ function RestaurantesPage() {
   // });
   // ====================================================
 
-  const filtered = mockRestaurantes
+  const restaurantesQuery = useRestaurantes(q, cat);
+  const restaurantes = restaurantesQuery.data ?? mockRestaurantes;
+  const filtered = restaurantes
     .filter(r => !q || r.nombre.toLowerCase().includes(q.toLowerCase()))
     .filter(r => !cat || r.categoria === cat.toLowerCase())
     .sort((a,b)=>b.calificacion_promedio - a.calificacion_promedio);

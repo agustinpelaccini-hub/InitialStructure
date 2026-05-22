@@ -4,7 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockClientes } from "@/lib/mock-data";
+import { useCreateCliente } from "@/hooks/apiHooks";
+import { useClientes } from "@/hooks/apiHooks";
 import { Plus } from "lucide-react";
+import * as React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/clientes")({
   component: ClientesPage,
@@ -20,13 +26,69 @@ function ClientesPage() {
   // GET /clientes/{id}/notificaciones          -> notificaciones (HU13)
   // ==============================================
 
+  const clientesQuery = useClientes();
+  const createCliente = useCreateCliente();
+
+  const [open, setOpen] = React.useState(false);
+  const [nombre, setNombre] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [direccion, setDireccion] = React.useState("");
+  const [telefono, setTelefono] = React.useState("");
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!nombre) {
+      // basic validation feedback
+      // import toast from sonner dynamically to avoid top-level changes
+      const { toast } = require("sonner");
+      toast.error("El nombre es obligatorio");
+      return;
+    }
+    createCliente.mutate({ nombre, email, direccion, telefono });
+    setOpen(false);
+    setNombre("");
+    setEmail("");
+    setDireccion("");
+    setTelefono("");
+  };
+
   return (
     <AppShell>
       <PageHeader
         title="Clientes"
         subtitle="Registro de usuarios que realizan pedidos"
-        actions={<Button><Plus className="h-4 w-4" />Nuevo cliente</Button>}
+        actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" />Nuevo cliente</Button>}
       />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuevo cliente</DialogTitle>
+            <DialogDescription>Completa los datos del nuevo cliente.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="grid gap-3 py-4">
+            <div>
+              <Label>Nombre</Label>
+              <Input value={nombre} onChange={e => setNombre(e.target.value)} />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+            <div>
+              <Label>Dirección</Label>
+              <Input value={direccion} onChange={e => setDireccion(e.target.value)} />
+            </div>
+            <div>
+              <Label>Teléfono</Label>
+              <Input value={telefono} onChange={e => setTelefono(e.target.value)} />
+            </div>
+            <DialogFooter>
+              <Button type="submit">Crear</Button>
+              <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
       <EndpointHint>GET {`{API_BASE_URL}`}/clientes</EndpointHint>
       <Card className="mt-6">
         <CardContent className="p-0">
@@ -42,7 +104,7 @@ function ClientesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockClientes.map(c => (
+              {(clientesQuery.data ?? mockClientes).map(c => (
                 <TableRow key={c.id}>
                   <TableCell className="font-mono">{c.id}</TableCell>
                   <TableCell className="font-semibold">{c.nombre}</TableCell>
