@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { LayoutDashboard, Store, Users, Bike, ShoppingBag, Ticket, Bell, BarChart3, Trophy, MapPin, LogOut, UtensilsCrossed, PackageCheck, ClipboardList } from "lucide-react";
 import { useRole, type Role } from "@/lib/role-context";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 
 type NavItem = { to: string; label: string; icon: any; roles: Role[] };
 
@@ -89,7 +88,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
       <main className="flex-1 overflow-auto">
         <div className="p-6 md:p-10 max-w-7xl mx-auto">{children}</div>
-        <Toaster />
       </main>
     </div>
   );

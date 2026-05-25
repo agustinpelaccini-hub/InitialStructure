@@ -4,8 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockClientes } from "@/lib/mock-data";
-import { useCreateCliente } from "@/hooks/apiHooks";
-import { useClientes } from "@/hooks/apiHooks";
+// Hooks removed during revert; use mock data for now.
 import { Plus } from "lucide-react";
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -26,8 +25,7 @@ function ClientesPage() {
   // GET /clientes/{id}/notificaciones          -> notificaciones (HU13)
   // ==============================================
 
-  const clientesQuery = useClientes();
-  const createCliente = useCreateCliente();
+  const clientesQuery = { data: mockClientes };
 
   const [open, setOpen] = React.useState(false);
   const [nombre, setNombre] = React.useState("");
@@ -38,13 +36,11 @@ function ClientesPage() {
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!nombre) {
-      // basic validation feedback
-      // import toast from sonner dynamically to avoid top-level changes
-      const { toast } = require("sonner");
-      toast.error("El nombre es obligatorio");
+      alert("El nombre es obligatorio");
       return;
     }
-    createCliente.mutate({ nombre, email, direccion, telefono });
+    // createCliente.mutate(...) removed during revert — log instead
+    console.log("Crear cliente:", { nombre, email, direccion, telefono });
     setOpen(false);
     setNombre("");
     setEmail("");

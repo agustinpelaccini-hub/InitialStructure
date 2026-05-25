@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPlatos, mockRestaurantes, mockPedidos } from "@/lib/mock-data";
 import { useRole } from "@/lib/role-context";
-import { usePlatosByRestaurant, useRestaurantes, useRestaurantePedidos, useCreatePlato } from "@/hooks/apiHooks";
+// Hooks removed during revert; rely on mock data instead.
 import { Plus } from "lucide-react";
 import * as React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -21,13 +21,10 @@ function MiRestaurante() {
   const { session } = useRole();
   const location = useLocation();
   const restId = session?.entidad_id;
-  const restaurantesQuery = useRestaurantes();
+  const restaurantesQuery = { data: mockRestaurantes };
   const rest = (restaurantesQuery.data ?? mockRestaurantes).find(r => r.id === restId);
-  const platosQuery = usePlatosByRestaurant(restId);
-  const platos = platosQuery.data ?? mockPlatos.filter(p => p.restaurante_id === restId);
-  const pedidosQuery = useRestaurantePedidos(restId);
-  const pedidos = pedidosQuery.data ?? mockPedidos.filter(p => p.restaurante_id === restId);
-  const createPlato = useCreatePlato();
+  const platos = mockPlatos.filter(p => p.restaurante_id === restId);
+  const pedidos = mockPedidos.filter(p => p.restaurante_id === restId);
   const [open, setOpen] = React.useState(false);
   const [nombrePlato, setNombrePlato] = React.useState("");
   const [precioPlato, setPrecioPlato] = React.useState<number | "">("");
@@ -41,13 +38,13 @@ function MiRestaurante() {
   const handleCreatePlato = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!restId || !nombrePlato) {
-      const { toast } = require("sonner");
-      toast.error("El nombre del plato es obligatorio");
+      alert("El nombre del plato es obligatorio");
       return;
     }
     const precio = typeof precioPlato === "number" ? precioPlato : Number(precioPlato || 0);
     const payload = { nombre: nombrePlato, descripcion: descripcionPlato, precio, disponible: disponiblePlato };
-    createPlato.mutate({ restId, payload });
+    // createPlato.mutate removed during revert — log instead
+    console.log("Crear plato:", { restId, payload });
     setOpen(false);
     setNombrePlato("");
     setPrecioPlato("");
