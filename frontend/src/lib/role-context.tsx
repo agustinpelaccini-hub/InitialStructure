@@ -35,17 +35,23 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setSession(JSON.parse(raw));
+      if (typeof localStorage !== "undefined") {
+        const raw = localStorage.getItem(KEY);
+        if (raw) setSession(JSON.parse(raw));
+      }
     } catch {}
   }, []);
 
   const login = (s: Session) => {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(KEY, JSON.stringify(s));
+    }
     setSession(s);
   };
   const logout = () => {
-    localStorage.removeItem(KEY);
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(KEY);
+    }
     setSession(null);
   };
 

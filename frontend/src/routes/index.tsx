@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mockPedidos, mockRestaurantes, mockClientes, mockRepartidores } from "@/lib/mock-data";
 import { useRole } from "@/lib/role-context";
 import { ShoppingBag, Store, Users, Bike, TrendingUp } from "lucide-react";
-import { useRestaurantesTop, useLatestPedidos } from "@/hooks/apiHooks";
+import { useRestaurantesTop, useLatestPedidos, useRestaurantes, useClientes, usePedidos } from "@/hooks/apiHooks";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
@@ -35,12 +35,15 @@ function Dashboard() {
 
   const topQuery = useRestaurantesTop();
   const pedidosQuery = useLatestPedidos(10);
+  const clientesQuery = useClientes();
+  const restaurantesQuery = useRestaurantes();
+  const pedidosAllQuery = usePedidos();
 
   const stats = [
-    { label: "Restaurantes", value: mockRestaurantes.length, icon: Store, color: "bg-orange-100 text-orange-700" },
-    { label: "Clientes", value: mockClientes.length, icon: Users, color: "bg-blue-100 text-blue-700" },
-    { label: "Repartidores", value: mockRepartidores.filter(r => r.disponible).length + "/" + mockRepartidores.length, icon: Bike, color: "bg-green-100 text-green-700" },
-    { label: "Pedidos hoy", value: mockPedidos.length, icon: ShoppingBag, color: "bg-pink-100 text-pink-700" },
+    { label: "Restaurantes", value: (restaurantesQuery.data ?? mockRestaurantes).length, icon: Store, color: "bg-orange-100 text-orange-700" },
+    { label: "Clientes", value: (clientesQuery.data ?? []).length, icon: Users, color: "bg-blue-100 text-blue-700" },
+    { label: "Repartidores", value: "—", icon: Bike, color: "bg-green-100 text-green-700" },
+    { label: "Pedidos hoy", value: (pedidosAllQuery.data ?? mockPedidos).length, icon: ShoppingBag, color: "bg-pink-100 text-pink-700" },
   ];
 
   return (

@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run full app (dev)",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "powershell",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${workspaceFolder}/run-dev.ps1"],
+      "console": "integratedTerminal",
+      "windows": {
+        "runtimeExecutable": "powershell"
+      }
+    }
+    ,
+    {
+      "name": "Run full app (docker)",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "powershell",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "docker compose up --build"],
+      "console": "integratedTerminal",
+      "windows": {
+        "runtimeExecutable": "powershell"
+      }
+    }
+  ]
+}
