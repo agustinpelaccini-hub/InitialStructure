@@ -50,7 +50,7 @@ function LoginPage() {
       });
       
       if (data.role === "repartidor") {
-        navigate({ to: `/repartidores/${data.entidad_id}` });
+        navigate({ to: "/mis-entregas" });
       } else if (data.role === "restaurante") {
         navigate({ to: `/restaurantes/${data.entidad_id}/panel` });
       } else if (data.role === "cliente") {
@@ -98,7 +98,7 @@ function LoginPage() {
       });
       
       if (data.role === "repartidor") {
-        navigate({ to: `/repartidores/${data.entidad_id}` });
+        navigate({ to: "/mis-entregas" });
       } else if (data.role === "restaurante") {
         navigate({ to: `/restaurantes/${data.entidad_id}/panel` });
       } else if (data.role === "cliente") {

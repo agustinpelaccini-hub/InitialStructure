@@ -55,13 +55,22 @@ class PedidoService:
             "direccion_entrega": pedido.direccion_entrega,
             "codigo_postal_entrega": pedido.codigo_postal_entrega,
         }
+        
+        # Agregar nombre del restaurante
+        if pedido.restaurante_id:
+            restaurante = self.rest_repo.find_by_id(pedido.restaurante_id)
+            if restaurante:
+                base["restaurante_nombre"] = restaurante.nombre
+        
         if items is not None:
             line_items = []
             for it in items:
                 sub = float(it.precio_unitario) * it.cantidad
+                plato = self.platos_repo.find_by_id(it.plato_id)
                 line_items.append(
                     {
                         "plato_id": it.plato_id,
+                        "plato_nombre": plato.nombre if plato else f"Plato #{it.plato_id}",
                         "cantidad": it.cantidad,
                         "precio_unitario": float(it.precio_unitario),
                         "subtotal": round(sub, 2),
@@ -132,13 +141,6 @@ class PedidoService:
         for plato_id, cantidad, precio in line_data:
             self.items_repo.create(pedido.id, plato_id, cantidad, precio)
 
-        # Asignar repartidor al azar automáticamente (pero dejar estado pendiente para que restaurante confirme)
-        disponibles = self.repartidor_repo.find_disponibles()
-        if disponibles:
-            rep = disponibles[0]
-            self.repartidor_repo.update(rep.id, disponible=False)
-            pedido = self.repo.update(pedido.id, repartidor_id=rep.id)
-
         return self.get_detail(pedido.id)
 
     def get_detail(self, pedido_id: int) -> dict:
@@ -154,8 +156,12 @@ class PedidoService:
     def get_by_cliente(self, cliente_id: int, estado: str | None = None) -> dict:
         pedidos = self.repo.find_by_cliente(cliente_id, estado)
         total_gastado = sum(float(p.total) for p in pedidos if p.estado == "entregado")
+        pedidos_dto = []
+        for p in pedidos:
+            items = self.items_repo.find_by_pedido(p.id)
+            pedidos_dto.append(self._to_dto(p, items))
         return {
-            "pedidos": [self._to_dto(p) for p in pedidos],
+            "pedidos": pedidos_dto,
             "total_gastado": round(total_gastado, 2),
         }
 
@@ -227,6 +233,15 @@ class PedidoService:
         prev = pedido.estado
         pedido = self.repo.update(pedido_id, estado=nuevo_estado)
         self.notif_repo.create(pedido_id, nuevo_estado)
+
+        # Asignar repartidor aleatorio cuando se confirma el pedido
+        if nuevo_estado == "confirmado" and not pedido.repartidor_id:
+            disponibles = self.repartidor_repo.find_disponibles()
+            if disponibles:
+                rep = random.choice(disponibles)
+                self.repartidor_repo.update(rep.id, disponible=False)
+                pedido = self.repo.update(pedido_id, repartidor_id=rep.id, estado="en_camino")
+                self._programar_entrega(pedido_id, rep.id)
 
         if nuevo_estado == "confirmado" and pedido.cupon_id:
             cupon = self.cupon_repo.find_by_id(pedido.cupon_id)

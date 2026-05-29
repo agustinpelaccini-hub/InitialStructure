@@ -44,6 +44,11 @@ def update_repartidor(repartidor_id: int, payload: UpdateRepartidorSchema, db: S
     return RepartidorService(db).update(repartidor_id, UpdateRepartidorDTO(**payload.model_dump(exclude_unset=True)))
 
 
+@router.patch("/{repartidor_id}", response_model=RepartidorResponseDTO)
+def patch_repartidor(repartidor_id: int, payload: UpdateRepartidorSchema, db: Session = Depends(get_db)):
+    return RepartidorService(db).update(repartidor_id, UpdateRepartidorDTO(**payload.model_dump(exclude_unset=True)))
+
+
 @router.delete("/{repartidor_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_repartidor(repartidor_id: int, db: Session = Depends(get_db)):
     RepartidorService(db).delete(repartidor_id)
