@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { mockRepartidores } from "@/lib/mock-data";
 import { useRepartidores, useCreateRepartidor, useDeleteRepartidor } from "@/hooks/apiHooks";
-import { Plus, Bike, Trash2 } from "lucide-react";
+import { Plus, Bike, Trash2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
@@ -16,6 +16,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/repartidores")({
   component: RepartidoresPage,
@@ -52,6 +53,15 @@ function RepartidoresPage() {
   const handleDelete = (id: number, nombre: string) => {
     if (confirm(`¿Estás seguro de eliminar al repartidor "${nombre}"?`)) {
       deleteRepartidor.mutate(id);
+    }
+  };
+
+  const handleToggleDisponible = async (id: number, disponible: boolean) => {
+    try {
+      await api.patch(`/repartidores/${id}`, { disponible: !disponible });
+      repartidoresQuery.refetch();
+    } catch (error) {
+      alert("Error al actualizar estado del repartidor");
     }
   };
 
@@ -114,6 +124,14 @@ function RepartidoresPage() {
                 >
                   {r.disponible ? "Disponible" : "Ocupado"}
                 </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleToggleDisponible(r.id, r.disponible)}
+                  title={r.disponible ? "Marcar como ocupado" : "Marcar como disponible"}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"

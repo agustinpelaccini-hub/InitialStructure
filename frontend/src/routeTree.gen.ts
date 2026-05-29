@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZonasRouteImport } from './routes/zonas'
 import { Route as ReportesRouteImport } from './routes/reportes'
 import { Route as RepartidoresRouteImport } from './routes/repartidores'
+import { Route as RepartidorDashboardRouteImport } from './routes/repartidor-dashboard'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as PedidosRouteImport } from './routes/pedidos'
+import { Route as NuevoPedidoRouteImport } from './routes/nuevo-pedido'
 import { Route as NotificacionesRouteImport } from './routes/notificaciones'
 import { Route as MisPedidosRouteImport } from './routes/mis-pedidos'
 import { Route as MisEntregasRouteImport } from './routes/mis-entregas'
@@ -41,6 +43,11 @@ const RepartidoresRoute = RepartidoresRouteImport.update({
   path: '/repartidores',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RepartidorDashboardRoute = RepartidorDashboardRouteImport.update({
+  id: '/repartidor-dashboard',
+  path: '/repartidor-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RankingsRoute = RankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
@@ -49,6 +56,11 @@ const RankingsRoute = RankingsRouteImport.update({
 const PedidosRoute = PedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NuevoPedidoRoute = NuevoPedidoRouteImport.update({
+  id: '/nuevo-pedido',
+  path: '/nuevo-pedido',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificacionesRoute = NotificacionesRouteImport.update({
@@ -116,8 +128,10 @@ export interface FileRoutesByFullPath {
   '/mis-entregas': typeof MisEntregasRoute
   '/mis-pedidos': typeof MisPedidosRoute
   '/notificaciones': typeof NotificacionesRoute
+  '/nuevo-pedido': typeof NuevoPedidoRoute
   '/pedidos': typeof PedidosRoute
   '/rankings': typeof RankingsRoute
+  '/repartidor-dashboard': typeof RepartidorDashboardRoute
   '/repartidores': typeof RepartidoresRoute
   '/reportes': typeof ReportesRoute
   '/zonas': typeof ZonasRoute
@@ -134,8 +148,10 @@ export interface FileRoutesByTo {
   '/mis-entregas': typeof MisEntregasRoute
   '/mis-pedidos': typeof MisPedidosRoute
   '/notificaciones': typeof NotificacionesRoute
+  '/nuevo-pedido': typeof NuevoPedidoRoute
   '/pedidos': typeof PedidosRoute
   '/rankings': typeof RankingsRoute
+  '/repartidor-dashboard': typeof RepartidorDashboardRoute
   '/repartidores': typeof RepartidoresRoute
   '/reportes': typeof ReportesRoute
   '/zonas': typeof ZonasRoute
@@ -153,8 +169,10 @@ export interface FileRoutesById {
   '/mis-entregas': typeof MisEntregasRoute
   '/mis-pedidos': typeof MisPedidosRoute
   '/notificaciones': typeof NotificacionesRoute
+  '/nuevo-pedido': typeof NuevoPedidoRoute
   '/pedidos': typeof PedidosRoute
   '/rankings': typeof RankingsRoute
+  '/repartidor-dashboard': typeof RepartidorDashboardRoute
   '/repartidores': typeof RepartidoresRoute
   '/reportes': typeof ReportesRoute
   '/zonas': typeof ZonasRoute
@@ -173,8 +191,10 @@ export interface FileRouteTypes {
     | '/mis-entregas'
     | '/mis-pedidos'
     | '/notificaciones'
+    | '/nuevo-pedido'
     | '/pedidos'
     | '/rankings'
+    | '/repartidor-dashboard'
     | '/repartidores'
     | '/reportes'
     | '/zonas'
@@ -191,8 +211,10 @@ export interface FileRouteTypes {
     | '/mis-entregas'
     | '/mis-pedidos'
     | '/notificaciones'
+    | '/nuevo-pedido'
     | '/pedidos'
     | '/rankings'
+    | '/repartidor-dashboard'
     | '/repartidores'
     | '/reportes'
     | '/zonas'
@@ -209,8 +231,10 @@ export interface FileRouteTypes {
     | '/mis-entregas'
     | '/mis-pedidos'
     | '/notificaciones'
+    | '/nuevo-pedido'
     | '/pedidos'
     | '/rankings'
+    | '/repartidor-dashboard'
     | '/repartidores'
     | '/reportes'
     | '/zonas'
@@ -228,8 +252,10 @@ export interface RootRouteChildren {
   MisEntregasRoute: typeof MisEntregasRoute
   MisPedidosRoute: typeof MisPedidosRoute
   NotificacionesRoute: typeof NotificacionesRoute
+  NuevoPedidoRoute: typeof NuevoPedidoRoute
   PedidosRoute: typeof PedidosRoute
   RankingsRoute: typeof RankingsRoute
+  RepartidorDashboardRoute: typeof RepartidorDashboardRoute
   RepartidoresRoute: typeof RepartidoresRoute
   ReportesRoute: typeof ReportesRoute
   ZonasRoute: typeof ZonasRoute
@@ -260,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RepartidoresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/repartidor-dashboard': {
+      id: '/repartidor-dashboard'
+      path: '/repartidor-dashboard'
+      fullPath: '/repartidor-dashboard'
+      preLoaderRoute: typeof RepartidorDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rankings': {
       id: '/rankings'
       path: '/rankings'
@@ -272,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/pedidos'
       fullPath: '/pedidos'
       preLoaderRoute: typeof PedidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nuevo-pedido': {
+      id: '/nuevo-pedido'
+      path: '/nuevo-pedido'
+      fullPath: '/nuevo-pedido'
+      preLoaderRoute: typeof NuevoPedidoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notificaciones': {
@@ -375,8 +415,10 @@ const rootRouteChildren: RootRouteChildren = {
   MisEntregasRoute: MisEntregasRoute,
   MisPedidosRoute: MisPedidosRoute,
   NotificacionesRoute: NotificacionesRoute,
+  NuevoPedidoRoute: NuevoPedidoRoute,
   PedidosRoute: PedidosRoute,
   RankingsRoute: RankingsRoute,
+  RepartidorDashboardRoute: RepartidorDashboardRoute,
   RepartidoresRoute: RepartidoresRoute,
   ReportesRoute: ReportesRoute,
   ZonasRoute: ZonasRoute,

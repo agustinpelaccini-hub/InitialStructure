@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell, PageHeader, EndpointHint, RoleGate } from "@/components/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ const estadoColor: Record<string, string> = {
 
 function MisPedidos() {
   const { session } = useRole();
+  const navigate = useNavigate();
 
   try {
     // ============ ENDPOINTS — CLIENTE (HU4, HU8, HU13) ============
@@ -48,7 +49,7 @@ function MisPedidos() {
     }
 
     const pedidosQuery = useClientePedidos(session?.entidad_id);
-    const pedidos = pedidosQuery.data ?? mockPedidos.filter(p => p.cliente_id === session?.entidad_id);
+    const pedidos = (pedidosQuery.data?.pedidos ?? mockPedidos.filter(p => p.cliente_id === session?.entidad_id)).filter(p => p.estado !== "entregado" && p.estado !== "cancelado");
 
     if (pedidosQuery.isLoading) {
       return (
@@ -81,7 +82,7 @@ function MisPedidos() {
         <PageHeader
           title="Mis pedidos"
           subtitle={`Historial de ${session?.nombre}`}
-          actions={<Button><Plus className="h-4 w-4" />Nuevo pedido</Button>}
+          actions={<Button onClick={() => navigate({ to: "/nuevo-pedido" })}><Plus className="h-4 w-4" />Nuevo pedido</Button>}
         />
         <EndpointHint>GET {`{API_BASE_URL}`}/clientes/{session?.entidad_id}/pedidos</EndpointHint>
         <Card className="mt-6">

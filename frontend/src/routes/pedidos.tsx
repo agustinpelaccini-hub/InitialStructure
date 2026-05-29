@@ -4,8 +4,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { mockPedidos, mockClientes, mockRestaurantes, ESTADOS } from "@/lib/mock-data";
-import { useLatestPedidos, useCreatePedido, useAssignPedido } from "@/hooks/apiHooks";
+import { useLatestPedidos, useCreatePedido, useAssignPedido, useRepartidores } from "@/hooks/apiHooks";
 import { Plus } from "lucide-react";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/pedidos")({
   component: PedidosPage,
@@ -50,6 +59,10 @@ function PedidosPage() {
   const pedidosQuery = useLatestPedidos();
   const createPedido = useCreatePedido();
   const assignPedido = useAssignPedido();
+  const repartidoresQuery = useRepartidores();
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [selectedPedidoId, setSelectedPedidoId] = useState<number | null>(null);
+  const [selectedRepartidorId, setSelectedRepartidorId] = useState<number | null>(null);
 
   const handleNewPedido = () => {
     const cliente_id = mockClientes[0]?.id ?? 1;
@@ -63,6 +76,19 @@ function PedidosPage() {
       items,
     };
     createPedido.mutate(payload);
+  };
+
+  const handleAssignClick = (pedidoId: number) => {
+    setSelectedPedidoId(pedidoId);
+    setSelectedRepartidorId(null);
+    setAssignDialogOpen(true);
+  };
+
+  const handleAssignConfirm = () => {
+    if (selectedPedidoId && selectedRepartidorId) {
+      assignPedido.mutate({ pedido_id: selectedPedidoId, repartidor_id: selectedRepartidorId });
+      setAssignDialogOpen(false);
+    }
   };
 
   return (
@@ -111,7 +137,7 @@ function PedidosPage() {
                     <TableCell className="text-right font-semibold">${p.total.toLocaleString()}</TableCell>
                     <TableCell className="flex items-center gap-2">
                       <Button variant="ghost" size="sm">Ver</Button>
-                      <Button size="sm" variant="outline" onClick={() => assignPedido.mutate(p.id)}>Asignar</Button>
+                      <Button size="sm" variant="outline" onClick={() => handleAssignClick(p.id)}>Asignar repartidor</Button>
                     </TableCell>
                   </TableRow>
                 );
@@ -120,6 +146,37 @@ function PedidosPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Asignar repartidor</DialogTitle>
+            <DialogDescription>Seleccioná un repartidor disponible para este pedido.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {repartidoresQuery.data?.filter(r => r.disponible).map(r => (
+              <div
+                key={r.id}
+                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                  selectedRepartidorId === r.id ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
+                }`}
+                onClick={() => setSelectedRepartidorId(r.id)}
+              >
+                <div className="font-medium">{r.nombre}</div>
+                <div className="text-sm text-muted-foreground">{r.vehiculo}</div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setAssignDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAssignConfirm} disabled={!selectedRepartidorId}>
+              Asignar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

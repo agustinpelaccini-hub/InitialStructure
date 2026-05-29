@@ -78,8 +78,9 @@ class PedidoService:
         if not items_in:
             raise BadRequestError("El pedido debe tener al menos un plato")
 
-        if not self.zonas_repo.covers_postal(restaurante_id, cp):
-            raise BadRequestError("La dirección está fuera de la zona de cobertura del restaurante")
+        # Validación de zona de cobertura deshabilitada
+        # if not self.zonas_repo.covers_postal(restaurante_id, cp):
+        #     raise BadRequestError("La dirección está fuera de la zona de cobertura del restaurante")
 
         subtotal = 0.0
         line_data = []
@@ -128,6 +129,13 @@ class PedidoService:
         for plato_id, cantidad, precio in line_data:
             self.items_repo.create(pedido.id, plato_id, cantidad, precio)
 
+        # Asignar repartidor al azar automáticamente (pero dejar estado pendiente para que restaurante confirme)
+        disponibles = self.repartidor_repo.find_disponibles()
+        if disponibles:
+            rep = disponibles[0]
+            self.repartidor_repo.update(rep.id, disponible=False)
+            pedido = self.repo.update(pedido.id, repartidor_id=rep.id)
+
         return self.get_detail(pedido.id)
 
     def get_detail(self, pedido_id: int) -> dict:
@@ -148,13 +156,23 @@ class PedidoService:
             "total_gastado": round(total_gastado, 2),
         }
 
-    def asignar_repartidor(self, pedido_id: int) -> dict:
+    def asignar_repartidor(self, pedido_id: int, repartidor_id: int | None = None) -> dict:
         pedido = self.repo.find_by_id(pedido_id)
         if not pedido:
             raise NotFoundError(f"Pedido {pedido_id} no encontrado")
         if pedido.estado in ESTADOS_FINALES:
             raise BadRequestError("No se puede asignar repartidor a un pedido finalizado")
 
+        if repartidor_id:
+            # Asignación manual de repartidor específico
+            rep = self.repartidor_repo.find_by_id(repartidor_id)
+            if not rep:
+                raise NotFoundError(f"Repartidor {repartidor_id} no encontrado")
+            self.repartidor_repo.update(rep.id, disponible=False)
+            pedido = self.repo.update(pedido_id, repartidor_id=rep.id)
+            return self._to_dto(pedido)
+
+        # Asignación automática de repartidor disponible
         disponibles = self.repartidor_repo.find_disponibles()
         if not disponibles:
             pedido = self.repo.update(pedido_id, estado="sin_repartidor")
@@ -170,8 +188,11 @@ class PedidoService:
         pedido = self.repo.find_by_id(pedido_id)
         if not pedido:
             raise NotFoundError(f"Pedido {pedido_id} no encontrado")
-        if pedido.estado in ESTADOS_FINALES:
-            raise BadRequestError("El pedido no puede modificarse")
+        
+        # Permitir transición al mismo estado (no hacer nada)
+        if pedido.estado == nuevo_estado:
+            return self._to_dto(pedido)
+        
         permitidos = TRANSICIONES.get(pedido.estado, set())
         if nuevo_estado not in permitidos:
             raise BadRequestError(
@@ -208,8 +229,9 @@ class PedidoService:
         if "repartidor_id" in data and data["repartidor_id"]:
             return self.asignar_repartidor(pedido_id)
 
-        if pedido.estado in ESTADOS_FINALES:
-            raise BadRequestError("El pedido no puede modificarse")
+        # Validación de estados finales deshabilitada temporalmente
+        # if pedido.estado in ESTADOS_FINALES:
+        #     raise BadRequestError("El pedido no puede modificarse")
 
         pedido = self.repo.update(pedido_id, **data)
         return self._to_dto(pedido)

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRole, type Role } from "@/lib/role-context";
 import { setAuthToken } from "@/lib/api";
-import { mockClientes, mockRepartidores, mockRestaurantes } from "@/lib/mock-data";
+import { useClientes, useRepartidores, useRestaurantes } from "@/hooks/apiHooks";
 import { Shield, User, Bike, Store } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
@@ -19,19 +19,32 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { login } = useRole();
   const navigate = useNavigate();
+  const clientesQuery = useClientes();
+  const repartidoresQuery = useRepartidores();
+  const restaurantesQuery = useRestaurantes();
 
   const elegir = (rol: Role, entidad_id: number | null, nombre: string) => {
     // Guardar sesión mock + token local (preparación para auth real)
     setAuthToken("mock-token");
     login({ rol, entidad_id, nombre });
-    navigate({ to: "/" });
+    
+    // Redirigir según el rol
+    if (rol === "repartidor") {
+      navigate({ to: "/repartidor-dashboard" });
+    } else {
+      navigate({ to: "/" });
+    }
   };
+
+  const clientes = clientesQuery.data ?? [];
+  const repartidores = repartidoresQuery.data ?? [];
+  const restaurantes = restaurantesQuery.data ?? [];
 
   const opciones = [
     { rol: "admin" as Role, nombre: "Administrador", icon: Shield, desc: "Ve y gestiona toda la plataforma", entidad_id: null },
-    ...mockClientes.slice(0, 1).map(c => ({ rol: "cliente" as Role, nombre: c.nombre, icon: User, desc: "Pedir comida y seguir mis pedidos", entidad_id: c.id })),
-    ...mockRepartidores.slice(0, 1).map(r => ({ rol: "repartidor" as Role, nombre: r.nombre, icon: Bike, desc: "Ver entregas asignadas", entidad_id: r.id })),
-    ...mockRestaurantes.slice(0, 1).map(r => ({ rol: "restaurante" as Role, nombre: r.nombre, icon: Store, desc: "Gestionar menú y pedidos del local", entidad_id: r.id })),
+    ...clientes.map(c => ({ rol: "cliente" as Role, nombre: c.nombre, icon: User, desc: "Pedir comida y seguir mis pedidos", entidad_id: c.id })),
+    ...repartidores.slice(0, 1).map(r => ({ rol: "repartidor" as Role, nombre: r.nombre, icon: Bike, desc: "Gestionar flota y asignaciones", entidad_id: r.id })),
+    ...restaurantes.map(r => ({ rol: "restaurante" as Role, nombre: r.nombre, icon: Store, desc: "Gestionar menú y pedidos del local", entidad_id: r.id })),
   ];
 
   return (

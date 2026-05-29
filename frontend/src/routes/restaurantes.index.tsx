@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { mockRestaurantes } from "@/lib/mock-data";
 import { useRestaurantes, useCreateRestaurante, useDeleteRestaurante } from "@/hooks/apiHooks";
+import { useRole } from "@/lib/role-context";
 import { Plus, Search, Trash2 } from "lucide-react";
 import {
   Dialog,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/restaurantes/")({
 });
 
 function RestaurantesPage() {
+  const { session } = useRole();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("");
   const [open, setOpen] = useState(false);
@@ -78,10 +80,12 @@ function RestaurantesPage() {
         title="Restaurantes"
         subtitle="Buscá, filtrá y administrá los restaurantes y su menú"
         actions={
-          <Button onClick={() => setOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Nuevo restaurante
-          </Button>
+          session?.rol !== "cliente" && (
+            <Button onClick={() => setOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Nuevo restaurante
+            </Button>
+          )
         }
       />
 
@@ -148,14 +152,16 @@ function RestaurantesPage() {
                   <span className="text-sm font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                     ★ {r.calificacion_promedio ?? 0}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(r.id, r.nombre)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {session?.rol !== "cliente" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(r.id, r.nombre)}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">{r.categoria}</div>

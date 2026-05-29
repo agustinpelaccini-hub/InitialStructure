@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { mockRestaurantes, mockPlatos } from "@/lib/mock-data";
-import { usePlatosByRestaurant, useRestaurantes, useTogglePlato, useCreatePlato } from "@/hooks/apiHooks";
-import { ArrowLeft, Plus } from "lucide-react";
+import { usePlatosByRestaurant, useRestaurantes, useTogglePlato, useCreatePlato, useDeletePlato } from "@/hooks/apiHooks";
+import { useRole } from "@/lib/role-context";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/restaurantes/$id")({
 });
 
 function MenuPage() {
+  const { session } = useRole();
   const { id } = Route.useParams();
   const restaurantesQuery = useRestaurantes();
   const restaurante = (restaurantesQuery.data ?? mockRestaurantes).find(r => r.id === Number(id));
@@ -29,6 +31,7 @@ function MenuPage() {
   const platos = platosQuery.data ?? mockPlatos.filter(p => p.restaurante_id === Number(id));
   const togglePlato = useTogglePlato();
   const createPlato = useCreatePlato();
+  const deletePlato = useDeletePlato();
 
   const [open, setOpen] = useState(false);
   const [nombre, setNombre] = useState("");
@@ -84,7 +87,7 @@ function MenuPage() {
       <PageHeader
         title={restaurante.nombre}
         subtitle={`${restaurante.categoria} · ${restaurante.direccion} · ★ ${restaurante.calificacion_promedio}`}
-        actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" />Agregar plato</Button>}
+        actions={session?.rol !== "cliente" && <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" />Agregar plato</Button>}
       />
 
       <EndpointHint>GET {`{API_BASE_URL}`}/restaurantes/{id}/menu</EndpointHint>
@@ -135,9 +138,20 @@ function MenuPage() {
                     <span className={`text-xs px-2 py-0.5 rounded-full inline-block ${p.disponible ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                       {p.disponible ? "Disponible" : "No disponible"}
                     </span>
-                    <button className="text-sm text-muted-foreground underline" onClick={() => togglePlato.mutate({ id: p.id, disponible: !p.disponible })}>
-                      {p.disponible ? "Desactivar" : "Activar"}
-                    </button>
+                    {session?.rol !== "cliente" && (
+                      <div className="flex gap-2">
+                        <button className="text-sm text-muted-foreground underline" onClick={() => togglePlato.mutate({ id: p.id, disponible: !p.disponible })}>
+                          {p.disponible ? "Desactivar" : "Activar"}
+                        </button>
+                        <button className="text-sm text-destructive underline" onClick={() => {
+                          if (confirm(`¿Estás seguro de eliminar el plato "${p.nombre}"?`)) {
+                            deletePlato.mutate(p.id);
+                          }
+                        }}>
+                          Eliminar
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

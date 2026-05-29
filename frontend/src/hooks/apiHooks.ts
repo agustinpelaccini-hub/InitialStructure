@@ -493,10 +493,11 @@ export function useAssignPedido() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      const { data } = await api.post(`/pedidos/${id}/asignar`);
+    mutationFn: async (data: { pedido_id: number; repartidor_id?: number }) => {
+      const { pedido_id, repartidor_id } = data;
+      const { data: responseData } = await api.post(`/pedidos/${pedido_id}/asignar`, repartidor_id ? { repartidor_id } : {});
 
-      return data;
+      return responseData;
     },
     onError: onMutationError,
     onSuccess: () =>
