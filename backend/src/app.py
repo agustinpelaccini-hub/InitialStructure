@@ -16,7 +16,7 @@ from src.routers import (
 )
 from src.utils.errors import AppError, BadRequestError, ConflictError
 
-app = FastAPI(title="Initial Structure API")
+app = FastAPI(title="Initial Structure API", docs_url="/api/docs", redoc_url="/api/redoc")
 
 app.add_middleware(
     CORSMiddleware,
