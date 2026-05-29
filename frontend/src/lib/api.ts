@@ -1,48 +1,73 @@
-// =====================================================================
-// CONFIGURACIÓN DE API — BACKEND FastAPI + PostgreSQL (pgAdmin)
-// =====================================================================
-// Cambiá esta URL por la de tu backend FastAPI cuando esté corriendo.
-// Ejemplo: "http://localhost:8000" o "https://tu-api.com"
-// Use relative `/api` in production (served behind nginx), otherwise localhost backend in dev.
-export const API_BASE_URL = import.meta.env && import.meta.env.PROD ? "/api" : "http://localhost:8000";
+import axios, { type AxiosError } from "axios";
 
-// Axios-based API helper with token handling.
-// Requires installing axios: `npm install axios` or `pnpm add axios`.
-import axios from "axios";
+/** Solo en el navegador; en SSR no hay window. */
+export const isBrowser = typeof window !== "undefined";
+
+/**
+ * URL directa del backend para evitar problemas con el proxy en Docker.
+ * El backend corre en localhost:8000.
+ */
+export const API_BASE_URL = "http://localhost:8000/api";
 
 export const api = axios.create({
-	baseURL: API_BASE_URL,
-	headers: { "Content-Type": "application/json" },
+  baseURL: API_BASE_URL,
+  headers: { "Content-Type": "application/json" },
+  timeout: 15000,
 });
 
 const TOKEN_KEY = "rappi_token";
 
 export function setAuthToken(token: string | null) {
-	// Avoid touching localStorage when running in SSR/dev runner (no window/localStorage)
-	if (typeof localStorage === "undefined") {
-		if (token) api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-		else delete api.defaults.headers.common["Authorization"];
-		return;
-	}
+  if (!isBrowser) {
+    if (token) api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    else delete api.defaults.headers.common.Authorization;
+    return;
+  }
 
-	if (token) {
-		localStorage.setItem(TOKEN_KEY, token);
-		api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-	} else {
-		localStorage.removeItem(TOKEN_KEY);
-		delete api.defaults.headers.common["Authorization"];
-	}
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+    delete api.defaults.headers.common.Authorization;
+  }
 }
 
 export function getAuthToken(): string | null {
-	if (typeof localStorage === "undefined") return null;
-	return localStorage.getItem(TOKEN_KEY);
+  if (!isBrowser) return null;
+  return localStorage.getItem(TOKEN_KEY);
 }
 
-// Initialize from storage if present
-if (typeof localStorage !== "undefined") {
-	const existing = getAuthToken();
-	if (existing) api.defaults.headers.common["Authorization"] = `Bearer ${existing}`;
+if (isBrowser) {
+  const existing = getAuthToken();
+  if (existing) api.defaults.headers.common.Authorization = `Bearer ${existing}`;
+}
+
+/** Mensaje legible desde respuesta FastAPI { message } o red caída. */
+export function getApiErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const ax = error as AxiosError<{ message?: string; detail?: string | unknown }>;
+    if (!ax.response) {
+      return "No se pudo conectar con el servidor. ¿Está corriendo el backend en el puerto 8000?";
+    }
+    const data = ax.response.data;
+    if (data && typeof data === "object") {
+      if ("message" in data && typeof data.message === "string") return data.message;
+      if ("detail" in data) {
+        if (typeof data.detail === "string") return data.detail;
+        if (Array.isArray(data.detail)) {
+          return data.detail.map((d: { msg?: string }) => d.msg ?? JSON.stringify(d)).join(", ");
+        }
+      }
+    }
+    return `Error ${ax.response.status}`;
+  }
+  if (error instanceof Error) return error.message;
+  return "Error desconocido";
+}
+
+export function alertApiError(error: unknown) {
+  if (isBrowser) alert(getApiErrorMessage(error));
 }
 
 export default api;

@@ -1,103 +1,31 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from src.db.connection import get_db
+from src.dtos.zona_cobertura_dto import CreateZonaCoberturaDTO, ZonaCoberturaResponseDTO
+from src.schemas.zona_cobertura_schema import CreateZonaCoberturaSchema
+from src.services.zona_cobertura_service import ZonaCoberturaService
 
-from src.dtos.zonas_cobertura_dto import (
-    CreateZonaCoberturaDTO,
-    UpdateZonaCoberturaDTO,
-    ZonaCoberturaResponseDTO
-)
-
-from src.schemas.zonas_cobertura_schema import (
-    CreateZonaCoberturaSchema,
-    UpdateZonaCoberturaSchema
-)
-
-from src.services.zonas_cobertura_service import (
-    ZonaCoberturaService
-)
+router = APIRouter(prefix="/zonas", tags=["zonas"])
 
 
-router = APIRouter(
-    prefix="/zonas-cobertura",
-    tags=["zonas-cobertura"]
-)
+@router.post("/", response_model=ZonaCoberturaResponseDTO, status_code=status.HTTP_201_CREATED)
+def create_zona(payload: CreateZonaCoberturaSchema, db: Session = Depends(get_db)):
+    return ZonaCoberturaService(db).create(CreateZonaCoberturaDTO(**payload.model_dump()))
 
 
-@router.post(
-    "/",
-    response_model=ZonaCoberturaResponseDTO,
-    status_code=status.HTTP_201_CREATED
-)
-def create_zona_cobertura(
-    payload: CreateZonaCoberturaSchema,
-    db: Session = Depends(get_db)
-):
-
-    dto = CreateZonaCoberturaDTO(
-        **payload.model_dump()
-    )
-
-    return ZonaCoberturaService(db).create(dto)
+@router.get("/", response_model=list[ZonaCoberturaResponseDTO])
+def list_zonas(restaurante_id: int | None = Query(None), db: Session = Depends(get_db)):
+    if restaurante_id:
+        return ZonaCoberturaService(db).get_by_restaurante(restaurante_id)
+    return ZonaCoberturaService(db).list_all()
 
 
-@router.get(
-    "/{zona_id}",
-    response_model=ZonaCoberturaResponseDTO
-)
-def get_zona_cobertura(
-    zona_id: int,
-    db: Session = Depends(get_db)
-):
-
-    dto = ZonaCoberturaService(db).get_by_id(zona_id)
-
-    return dto
+@router.get("/{zona_id}", response_model=ZonaCoberturaResponseDTO)
+def get_zona(zona_id: int, db: Session = Depends(get_db)):
+    return ZonaCoberturaService(db).get_by_id(zona_id)
 
 
-@router.get(
-    "/",
-    response_model=list[ZonaCoberturaResponseDTO]
-)
-def list_zonas_cobertura(
-    db: Session = Depends(get_db)
-):
-
-    dtos = ZonaCoberturaService(db).list_all()
-
-    return dtos
-
-
-@router.put(
-    "/{zona_id}",
-    response_model=ZonaCoberturaResponseDTO
-)
-def update_zona_cobertura(
-    zona_id: int,
-    payload: UpdateZonaCoberturaSchema,
-    db: Session = Depends(get_db)
-):
-
-    dto = UpdateZonaCoberturaDTO(
-        **payload.model_dump()
-    )
-
-    updated = ZonaCoberturaService(db).update(
-        zona_id,
-        dto
-    )
-
-    return updated
-
-
-@router.delete(
-    "/{zona_id}",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-def delete_zona_cobertura(
-    zona_id: int,
-    db: Session = Depends(get_db)
-):
-
+@router.delete("/{zona_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_zona(zona_id: int, db: Session = Depends(get_db)):
     ZonaCoberturaService(db).delete(zona_id)

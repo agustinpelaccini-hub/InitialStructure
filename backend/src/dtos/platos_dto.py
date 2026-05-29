@@ -2,10 +2,10 @@ from pydantic import BaseModel
 
 
 class CreatePlatoDTO(BaseModel):
-    restaurante_id: int
+    restaurante_id: int | None = None
     nombre: str
     descripcion: str | None = None
-    precio: int
+    precio: float
     disponible: bool | None = True
 
 
@@ -13,7 +13,7 @@ class UpdatePlatoDTO(BaseModel):
     restaurante_id: int | None = None
     nombre: str | None = None
     descripcion: str | None = None
-    precio: int | None = None
+    precio: float | None = None
     disponible: bool | None = None
 
 
@@ -30,7 +30,7 @@ class PlatoResponseDTO(BaseModel):
     restaurante_id: int
     nombre: str
     descripcion: str | None = None
-    precio: int
+    precio: float
     disponible: bool
 
     model_config = {"from_attributes": True}

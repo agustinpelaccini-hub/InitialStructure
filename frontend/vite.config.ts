@@ -12,4 +12,16 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      port: 5173,
+      proxy: {
+        "/api": {
+          // Docker: API_PROXY_TARGET=http://backend:8000 | local: 127.0.0.1:8000
+          target: process.env.API_PROXY_TARGET || "http://127.0.0.1:8000",
+          changeOrigin: true,
+        },
+      },
+    },
+  },
 });

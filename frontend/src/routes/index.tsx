@@ -18,9 +18,13 @@ function Dashboard() {
   // Redirigir cada rol a su home propio
   useEffect(() => {
     if (!session) return;
-    if (session.rol === "cliente") navigate({ to: "/mis-pedidos" });
-    else if (session.rol === "repartidor") navigate({ to: "/mis-entregas" });
-    else if (session.rol === "restaurante") navigate({ to: "/mi-restaurante" });
+    try {
+      if (session.rol === "cliente") navigate({ to: "/mis-pedidos" });
+      else if (session.rol === "repartidor") navigate({ to: "/mis-entregas" });
+      else if (session.rol === "restaurante") navigate({ to: "/mi-restaurante" });
+    } catch (error) {
+      console.error("Error en redirección:", error);
+    }
   }, [session, navigate]);
 
   if (!session || session.rol !== "admin") {

@@ -105,12 +105,8 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
-export function EndpointHint({ children }: { children: React.ReactNode }) {
-  //return (
-    //<div className="mt-2 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2 font-mono text-xs text-primary/90 whitespace-pre-wrap">
-      //{children}
-    //</div>
-  //);
+export function EndpointHint(_props: { children?: React.ReactNode }) {
+  return null;
 }
 
 export function RoleGate({ allow, children }: { allow: Role[]; children: React.ReactNode }) {

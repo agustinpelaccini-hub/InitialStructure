@@ -1,97 +1,27 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from src.db.connection import get_db
-
-from src.dtos.notificacion_dto import (
-    CreateNotificacionDTO,
-    UpdateNotificacionDTO,
-    NotificacionResponseDTO
-)
-
-from src.schemas.notificacion_schema import (
-    CreateNotificacionSchema,
-    UpdateNotificacionSchema
-)
-
+from src.dtos.notificacion_dto import NotificacionResponseDTO
 from src.services.notificacion_service import NotificacionService
 
-
-router = APIRouter(
-    prefix="/notificaciones",
-    tags=["notificaciones"]
-)
+router = APIRouter(prefix="/notificaciones", tags=["notificaciones"])
 
 
-@router.post(
-    "/",
-    response_model=NotificacionResponseDTO,
-    status_code=status.HTTP_201_CREATED
-)
-def create_notificacion(
-    payload: CreateNotificacionSchema,
-    db: Session = Depends(get_db)
-):
-
-    dto = CreateNotificacionDTO(**payload.model_dump())
-
-    return NotificacionService(db).create(dto)
+class PatchNotificacionSchema(BaseModel):
+    leida: bool = True
 
 
-@router.get(
-    "/{notificacion_id}",
-    response_model=NotificacionResponseDTO
-)
-def get_notificacion(
+@router.get("/", response_model=list[NotificacionResponseDTO])
+def list_notificaciones(db: Session = Depends(get_db)):
+    return NotificacionService(db).list_all()
+
+
+@router.patch("/{notificacion_id}", response_model=NotificacionResponseDTO)
+def patch_notificacion(
     notificacion_id: int,
-    db: Session = Depends(get_db)
+    payload: PatchNotificacionSchema,
+    db: Session = Depends(get_db),
 ):
-
-    dto = NotificacionService(db).get_by_id(notificacion_id)
-
-    return dto
-
-
-@router.get(
-    "/",
-    response_model=list[NotificacionResponseDTO]
-)
-def list_notificaciones(
-    db: Session = Depends(get_db)
-):
-
-    dtos = NotificacionService(db).list_all()
-
-    return dtos
-
-
-@router.put(
-    "/{notificacion_id}",
-    response_model=NotificacionResponseDTO
-)
-def update_notificacion(
-    notificacion_id: int,
-    payload: UpdateNotificacionSchema,
-    db: Session = Depends(get_db)
-):
-
-    dto = UpdateNotificacionDTO(**payload.model_dump())
-
-    updated = NotificacionService(db).update(
-        notificacion_id,
-        dto
-    )
-
-    return updated
-
-
-@router.delete(
-    "/{notificacion_id}",
-    status_code=status.HTTP_204_NO_CONTENT
-)
-def delete_notificacion(
-    notificacion_id: int,
-    db: Session = Depends(get_db)
-):
-
-    NotificacionService(db).delete(notificacion_id)
+    return NotificacionService(db).marcar_leida(notificacion_id, payload.leida)

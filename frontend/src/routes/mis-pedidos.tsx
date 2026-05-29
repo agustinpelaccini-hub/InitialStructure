@@ -25,20 +25,59 @@ const estadoColor: Record<string, string> = {
 function MisPedidos() {
   const { session } = useRole();
 
-  // ============ ENDPOINTS — CLIENTE (HU4, HU8, HU13) ============
-  // GET  /clientes/{cliente_id}/pedidos             -> historial propio (fecha desc)
-  // GET  /clientes/{cliente_id}/pedidos?estado=...  -> filtrar por estado
-  // POST /pedidos                                    -> crear pedido
-  //   body: { cliente_id, restaurante_id, items:[{plato_id,cantidad}], cupon_codigo?, direccion_entrega }
-  // GET  /clientes/{cliente_id}/notificaciones      -> avisos de cambio de estado
-  // ===============================================================
+  try {
+    // ============ ENDPOINTS — CLIENTE (HU4, HU8, HU13) ============
+    // GET  /clientes/{cliente_id}/pedidos             -> historial propio (fecha desc)
+    // GET  /clientes/{cliente_id}/pedidos?estado=...  -> filtrar por estado
+    // POST /pedidos                                    -> crear pedido
+    //   body: { cliente_id, restaurante_id, items:[{plato_id,cantidad}], cupon_codigo?, direccion_entrega }
+    // GET  /clientes/{cliente_id}/notificaciones      -> avisos de cambio de estado
+    // ===============================================================
 
-  const pedidosQuery = useClientePedidos(session?.entidad_id);
-  const pedidos = pedidosQuery.data ?? mockPedidos.filter(p => p.cliente_id === session?.entidad_id);
+    if (!session || session.rol !== "cliente") {
+      return (
+        <AppShell>
+          <PageHeader title="Acceso denegado" subtitle="Solo clientes pueden ver esta página" />
+          <Card className="mt-6">
+            <CardContent className="p-6 text-center text-destructive">
+              Acceso denegado
+            </CardContent>
+          </Card>
+        </AppShell>
+      );
+    }
 
-  return (
-    <AppShell>
-      <RoleGate allow={["cliente"]}>
+    const pedidosQuery = useClientePedidos(session?.entidad_id);
+    const pedidos = pedidosQuery.data ?? mockPedidos.filter(p => p.cliente_id === session?.entidad_id);
+
+    if (pedidosQuery.isLoading) {
+      return (
+        <AppShell>
+          <PageHeader title="Mis pedidos" subtitle="Cargando..." />
+          <Card className="mt-6">
+            <CardContent className="p-6 text-center text-muted-foreground">
+              Cargando...
+            </CardContent>
+          </Card>
+        </AppShell>
+      );
+    }
+
+    if (pedidosQuery.isError) {
+      return (
+        <AppShell>
+          <PageHeader title="Mis pedidos" subtitle="Error al cargar" />
+          <Card className="mt-6">
+            <CardContent className="p-6 text-center text-destructive">
+              Error al cargar pedidos. Mostrando datos de ejemplo.
+            </CardContent>
+          </Card>
+        </AppShell>
+      );
+    }
+
+    return (
+      <AppShell>
         <PageHeader
           title="Mis pedidos"
           subtitle={`Historial de ${session?.nombre}`}
@@ -77,7 +116,19 @@ function MisPedidos() {
             </Table>
           </CardContent>
         </Card>
-      </RoleGate>
-    </AppShell>
-  );
+      </AppShell>
+    );
+  } catch (error) {
+    console.error("Error en MisPedidos:", error);
+    return (
+      <AppShell>
+        <PageHeader title="Error" subtitle="Ocurrió un error inesperado" />
+        <Card className="mt-6">
+          <CardContent className="p-6 text-center text-destructive">
+            Error al cargar la página. Por favor recarga.
+          </CardContent>
+        </Card>
+      </AppShell>
+    );
+  }
 }

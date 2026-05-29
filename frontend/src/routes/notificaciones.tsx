@@ -30,25 +30,38 @@ function NotificacionesPage() {
 
   const markMut = useMarkNotificacion();
 
+  const handleMark = (id: number) => {
+    markMut.mutate({ id, leida: true }, {
+      onError: (err) => {
+        console.error("Error al marcar notificación:", err);
+        alert("Error al marcar notificación como leída. Es posible que la notificación ya no exista.");
+      }
+    });
+  };
+
   return (
     <AppShell>
       <PageHeader title="Notificaciones" subtitle="Cambios de estado de los pedidos" />
       <EndpointHint>GET {`{API_BASE_URL}`}/clientes/{`{id}`}/notificaciones  ·  PATCH {`{API_BASE_URL}`}/notificaciones/{`{id}`}</EndpointHint>
       <div className="space-y-3 mt-6">
-        {sorted.map(n => (
-          <Card key={n.id} className={n.leida ? "opacity-60" : "border-primary/30"}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className={`h-10 w-10 rounded-full flex items-center justify-center ${n.leida ? "bg-muted" : "bg-primary/10"}`}>
-                <Bell className={`h-5 w-5 ${n.leida ? "text-muted-foreground" : "text-primary"}`} />
-              </div>
-              <div className="flex-1">
-                <div className="font-semibold">Pedido #{n.pedido_id} → <span className="capitalize">{n.estado_nuevo.replace("_"," ")}</span></div>
-                <div className="text-xs text-muted-foreground">{new Date(n.fecha).toLocaleString()}</div>
-              </div>
-              {!n.leida && <Button size="sm" variant="ghost" onClick={() => markMut.mutate({ id: n.id, leida: true })}><Check className="h-4 w-4" />Marcar leída</Button>}
-            </CardContent>
-          </Card>
-        ))}
+        {sorted.length === 0 ? (
+          <Card><CardContent className="p-6 text-center text-muted-foreground">No hay notificaciones</CardContent></Card>
+        ) : (
+          sorted.map(n => (
+            <Card key={n.id} className={n.leida ? "opacity-60" : "border-primary/30"}>
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${n.leida ? "bg-muted" : "bg-primary/10"}`}>
+                  <Bell className={`h-5 w-5 ${n.leida ? "text-muted-foreground" : "text-primary"}`} />
+                </div>
+                <div className="flex-1">
+                  <div className="font-semibold">Pedido #{n.pedido_id} → <span className="capitalize">{n.estado_nuevo.replace("_"," ")}</span></div>
+                  <div className="text-xs text-muted-foreground">{new Date(n.fecha).toLocaleString()}</div>
+                </div>
+                {!n.leida && <Button size="sm" variant="ghost" onClick={() => handleMark(n.id)}><Check className="h-4 w-4" />Marcar leída</Button>}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </AppShell>
   );

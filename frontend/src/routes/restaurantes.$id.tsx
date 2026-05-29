@@ -2,9 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, PageHeader, EndpointHint } from "@/components/AppShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { mockRestaurantes, mockPlatos } from "@/lib/mock-data";
-import { usePlatosByRestaurant, useRestaurantes, useTogglePlato } from "@/hooks/apiHooks";
+import { usePlatosByRestaurant, useRestaurantes, useTogglePlato, useCreatePlato } from "@/hooks/apiHooks";
 import { ArrowLeft, Plus } from "lucide-react";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/restaurantes/$id")({
   component: MenuPage,
@@ -17,6 +28,39 @@ function MenuPage() {
   const platosQuery = usePlatosByRestaurant(Number(id));
   const platos = platosQuery.data ?? mockPlatos.filter(p => p.restaurante_id === Number(id));
   const togglePlato = useTogglePlato();
+  const createPlato = useCreatePlato();
+
+  const [open, setOpen] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [precio, setPrecio] = useState("");
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nombre.trim() || !precio.trim()) {
+      alert("Completá nombre y precio");
+      return;
+    }
+    createPlato.mutate(
+      {
+        restauranteId: Number(id),
+        payload: {
+          nombre: nombre.trim(),
+          descripcion: descripcion.trim() || undefined,
+          precio: Number(precio),
+          disponible: true,
+        },
+      },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          setNombre("");
+          setDescripcion("");
+          setPrecio("");
+        },
+      },
+    );
+  };
 
   // ============ ENDPOINTS — HU1 ============
   // GET /restaurantes/{id}            -> info del restaurante
@@ -40,10 +84,41 @@ function MenuPage() {
       <PageHeader
         title={restaurante.nombre}
         subtitle={`${restaurante.categoria} · ${restaurante.direccion} · ★ ${restaurante.calificacion_promedio}`}
-        actions={<Button><Plus className="h-4 w-4" />Agregar plato</Button>}
+        actions={<Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" />Agregar plato</Button>}
       />
 
       <EndpointHint>GET {`{API_BASE_URL}`}/restaurantes/{id}/menu</EndpointHint>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nuevo plato</DialogTitle>
+            <DialogDescription>Agregá un plato al menú del restaurante.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreate} className="grid gap-3 py-4">
+            <div>
+              <Label>Nombre</Label>
+              <Input value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+            </div>
+            <div>
+              <Label>Descripción</Label>
+              <Input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
+            </div>
+            <div>
+              <Label>Precio</Label>
+              <Input type="number" step="0.01" value={precio} onChange={(e) => setPrecio(e.target.value)} required />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={createPlato.isPending}>
+                {createPlato.isPending ? "Guardando…" : "Crear"}
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+                Cancelar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid md:grid-cols-2 gap-4 mt-6">
         {platos.map(p => (

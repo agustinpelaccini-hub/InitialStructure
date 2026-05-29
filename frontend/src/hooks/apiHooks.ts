@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "@/lib/api";
+import api, { alertApiError } from "@/lib/api";
+
+const onMutationError = (err: unknown) => alertApiError(err);
 
 // Clientes
 export function useClientes() {
@@ -16,12 +18,27 @@ export function useCreateCliente() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Record<string, string>) => {
       const { data } = await api.post("/clientes", payload);
       return data;
     },
+    onError: onMutationError,
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["clientes"] }),
+  });
+}
+
+export function useDeleteCliente() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/clientes/${id}`);
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["clientes"] });
+    },
   });
 }
 
@@ -40,12 +57,27 @@ export function useCreateCupon() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Record<string, unknown>) => {
       const { data } = await api.post("/cupones", payload);
       return data;
     },
+    onError: onMutationError,
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["cupones"] }),
+  });
+}
+
+export function useDeleteCupon() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/cupones/${id}`);
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["cupones"] });
+    },
   });
 }
 
@@ -174,6 +206,7 @@ export function useMarkNotificacion() {
 
       return data;
     },
+    onError: onMutationError,
     onSuccess: () =>
       qc.invalidateQueries({
         queryKey: ["clientes"],
@@ -219,6 +252,7 @@ export function useToggleRepartidor() {
 
       return data;
     },
+    onError: onMutationError,
     onSuccess: () =>
       qc.invalidateQueries({
         queryKey: ["repartidores"],
@@ -238,14 +272,147 @@ export function useUpdatePedidoEstado() {
 
       return data;
     },
-    onSuccess: () =>
-      qc.invalidateQueries({
-        queryKey: ["pedidos"],
-      }),
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pedidos"] });
+      qc.invalidateQueries({ queryKey: ["repartidores"] });
+    },
   });
 }
 
 // Platos & restaurantes helpers
+export function useCreatePlato() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      restauranteId,
+      payload,
+    }: {
+      restauranteId: number;
+      payload: Record<string, unknown>;
+    }) => {
+      const { data } = await api.post(
+        `/restaurantes/${restauranteId}/platos`,
+        payload
+      );
+      return data;
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["platos"] });
+    },
+  });
+}
+
+export function useDeletePlato() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/platos/${id}`);
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["platos"] });
+    },
+  });
+}
+
+export function useCreateRepartidor() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.post("/repartidores", payload);
+      return data;
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["repartidores"] });
+    },
+  });
+}
+
+export function useDeleteRepartidor() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/repartidores/${id}`);
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["repartidores"] });
+    },
+  });
+}
+
+export function useCreateRestaurante() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.post("/restaurantes", payload);
+      return data;
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["restaurantes"] });
+    },
+  });
+}
+
+export function useDeleteRestaurante() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/restaurantes/${id}`);
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["restaurantes"] });
+    },
+  });
+}
+
+export function useZonas() {
+  return useQuery({
+    queryKey: ["zonas"],
+    queryFn: async () => {
+      const { data } = await api.get("/zonas");
+      return data;
+    },
+  });
+}
+
+export function useCreateZona() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.post("/zonas", payload);
+      return data;
+    },
+    onError: onMutationError,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["zonas"] });
+    },
+  });
+}
+
+export function useDeleteZona() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await api.delete(`/zonas/${id}`);
+    },
+    onError: onMutationError,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["zonas"] }),
+  });
+}
+
 export function usePlatosByRestaurant(
   restauranteId?: number | null
 ) {
@@ -283,6 +450,7 @@ export function useTogglePlato() {
 
       return data;
     },
+    onError: onMutationError,
     onSuccess: () =>
       qc.invalidateQueries({
         queryKey: ["platos"],
@@ -313,6 +481,7 @@ export function useCreatePedido() {
 
       return data;
     },
+    onError: onMutationError,
     onSuccess: () =>
       qc.invalidateQueries({
         queryKey: ["pedidos"],
@@ -324,17 +493,12 @@ export function useAssignPedido() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      repartidor_id,
-    }: any) => {
-      const { data } = await api.put(
-        `/pedidos/${id}`,
-        { repartidor_id }
-      );
+    mutationFn: async (id: number) => {
+      const { data } = await api.post(`/pedidos/${id}/asignar`);
 
       return data;
     },
+    onError: onMutationError,
     onSuccess: () =>
       qc.invalidateQueries({
         queryKey: ["pedidos"],

@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String, Numeric
 
 from src.db.connection import Base
 
@@ -8,8 +7,7 @@ class Restaurantes(Base):
     __tablename__ = "restaurantes"
 
     id = Column(Integer, primary_key=True)
-    nombre = Column(String, nullable=False)
-    categoria = Column(String, nullable=False)#
-    direccion = Column(String, nullable=False)#
-    calificacion = Column(Integer, nullable=True)#
-    telefono = Column(String, nullable=False)##
+    nombre = Column(String(100), nullable=False)
+    categoria = Column(String(50), nullable=False)
+    direccion = Column(String, nullable=False)
+    calificacion_promedio = Column(Numeric(3, 2), default=0)

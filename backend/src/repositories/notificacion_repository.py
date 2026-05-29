@@ -1,81 +1,41 @@
 from sqlalchemy.orm import Session
 
 from src.db.models.notificacion_model import Notificacion
+from src.db.models.pedido_model import Pedidos
 
 
 class NotificacionRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(
-        self,
-        pedido_id: int,
-        estado_nuevo: str,
-        usuario_id: int,
-        leida: bool = False,
-        precio: int = 0
-    ) -> Notificacion:
-
-        notificacion = Notificacion(
-            pedido_id=pedido_id,
-            estado_nuevo=estado_nuevo,
-            usuario_id=usuario_id,
-            leida=leida,
-            precio=precio
-        )
-
-        self.db.add(notificacion)
+    def create(self, pedido_id: int, estado_nuevo: str) -> Notificacion:
+        n = Notificacion(pedido_id=pedido_id, estado_nuevo=estado_nuevo, leida=False)
+        self.db.add(n)
         self.db.commit()
-        self.db.refresh(notificacion)
-
-        return notificacion
+        self.db.refresh(n)
+        return n
 
     def find_by_id(self, notificacion_id: int) -> Notificacion | None:
-        return (
-            self.db.query(Notificacion)
-            .filter(Notificacion.id == notificacion_id)
-            .first()
-        )
+        return self.db.query(Notificacion).filter(Notificacion.id == notificacion_id).first()
 
     def list_all(self) -> list[Notificacion]:
         return self.db.query(Notificacion).all()
 
-    def find_by_usuario(self, usuario_id: int) -> list[Notificacion]:
+    def find_by_cliente(self, cliente_id: int) -> list[Notificacion]:
         return (
             self.db.query(Notificacion)
-            .filter(Notificacion.usuario_id == usuario_id)
+            .join(Pedidos, Pedidos.id == Notificacion.pedido_id)
+            .filter(Pedidos.cliente_id == cliente_id)
+            .order_by(Notificacion.leida.asc(), Notificacion.fecha.desc())
             .all()
         )
 
     def update(self, notificacion_id: int, **fields) -> Notificacion | None:
-        notificacion = (
-            self.db.query(Notificacion)
-            .filter(Notificacion.id == notificacion_id)
-            .first()
-        )
-
-        if not notificacion:
+        n = self.find_by_id(notificacion_id)
+        if not n:
             return None
-
         for key, value in fields.items():
-            setattr(notificacion, key, value)
-
+            setattr(n, key, value)
         self.db.commit()
-        self.db.refresh(notificacion)
-
-        return notificacion
-
-    def delete(self, notificacion_id: int) -> bool:
-        notificacion = (
-            self.db.query(Notificacion)
-            .filter(Notificacion.id == notificacion_id)
-            .first()
-        )
-
-        if not notificacion:
-            return False
-
-        self.db.delete(notificacion)
-        self.db.commit()
-
-        return True
+        self.db.refresh(n)
+        return n

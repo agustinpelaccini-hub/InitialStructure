@@ -7,8 +7,8 @@ class CreatePedidoDTO(BaseModel):
     repartidor_id: int | None = None
     cupon_id: int | None = None
     estado: str | None = "pendiente"
-    subtotal: int
-    total: int
+    subtotal: float
+    total: float
     direccion_entrega: str
     codigo_postal_entrega: str
 
@@ -19,8 +19,8 @@ class UpdatePedidoDTO(BaseModel):
     repartidor_id: int | None = None
     cupon_id: int | None = None
     estado: str | None = None
-    subtotal: int | None = None
-    total: int | None = None
+    subtotal: float | None = None
+    total: float | None = None
     direccion_entrega: str | None = None
     codigo_postal_entrega: str | None = None
 
@@ -41,8 +41,8 @@ class PedidoResponseDTO(BaseModel):
     cupon_id: int | None = None
     fecha: str
     estado: str
-    subtotal: int
-    total: int
+    subtotal: float
+    total: float
     direccion_entrega: str
     codigo_postal_entrega: str
 

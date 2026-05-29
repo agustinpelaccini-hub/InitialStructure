@@ -12,7 +12,7 @@ class PlatoRepository:
         restaurante_id: int,
         nombre: str,
         descripcion: str | None,
-        precio: int,
+        precio: float,
         disponible: bool = True
     ) -> Platos:
 

@@ -55,7 +55,13 @@ function PedidosPage() {
     const cliente_id = mockClientes[0]?.id ?? 1;
     const restaurante_id = mockRestaurantes[0]?.id ?? 1;
     const items = [{ plato_id: 1, cantidad: 1 }];
-    const payload = { cliente_id, restaurante_id, direccion_entrega: "Calle Falsa 123", items };
+    const payload = {
+      cliente_id,
+      restaurante_id,
+      direccion_entrega: "Av. Belgrano 100",
+      codigo_postal_entrega: "1425",
+      items,
+    };
     createPedido.mutate(payload);
   };
 

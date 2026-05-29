@@ -5,7 +5,7 @@ class CreateClienteDTO(BaseModel):
     email: str
     nombre: str
     direccion: str
-    telefono: int
+    telefono: str
     role: str | None = "cliente"
 
 
@@ -13,7 +13,7 @@ class UpdateClienteDTO(BaseModel):
     email: str | None = None
     nombre: str | None = None
     direccion: str | None = None
-    telefono: int | None = None
+    telefono: str | None = None
     role: str | None = None
 
 
@@ -30,7 +30,7 @@ class ClienteResponseDTO(BaseModel):
     email: str
     nombre: str
     direccion: str
-    telefono: int
+    telefono: str
     role: str
     created_at: str
 

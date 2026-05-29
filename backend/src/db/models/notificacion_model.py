@@ -8,10 +8,7 @@ class Notificacion(Base):
     __tablename__ = "notificaciones"
 
     id = Column(Integer, primary_key=True)
-    pedido_id = Column(Integer, nullable=False)#
-    estado_nuevo = Column(String, nullable=False)#
-    usuario_id = Column(Integer, nullable=False)##
-    leida = Column(Boolean, default=False)#
-    fecha = Column(String, default=func.now())#
-    precio = Column(Integer, nullable=False)##
-  
+    pedido_id = Column(Integer, nullable=False)
+    estado_nuevo = Column(String(20), nullable=False)
+    fecha = Column(String, server_default=func.now())
+    leida = Column(Boolean, default=False)

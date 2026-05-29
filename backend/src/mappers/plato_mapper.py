@@ -1,7 +1,13 @@
-from src.db.models.platos_model import Plato
+from src.db.models.platos_model import Platos
 from src.dtos.platos_dto import PlatoResponseDTO
 
 
-def to_plato_response(plato: Plato) -> PlatoResponseDTO:
-    """Convierte un Model SQLAlchemy en un DTO de respuesta (sin campos sensibles)."""
-    return PlatoResponseDTO.model_validate(plato)
+def to_plato_response(plato: Platos) -> PlatoResponseDTO:
+    return PlatoResponseDTO(
+        id=plato.id,
+        restaurante_id=plato.restaurante_id,
+        nombre=plato.nombre,
+        descripcion=plato.descripcion,
+        precio=float(plato.precio),
+        disponible=plato.disponible,
+    )
