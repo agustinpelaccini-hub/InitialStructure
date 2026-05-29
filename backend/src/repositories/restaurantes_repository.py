@@ -131,7 +131,7 @@ class RestaurantRepository:
             .all()
         )
         return {
-            "cantidad_pedidos": cantidad,
+            "pedidos_entregados": cantidad,
             "facturacion_total": round(facturacion, 2),
             "ticket_promedio": round(ticket, 2),
             "top_platos": [{"nombre": n, "cantidad": int(q)} for n, q in top_platos],

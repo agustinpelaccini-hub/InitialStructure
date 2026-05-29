@@ -9,7 +9,8 @@ class Clientes(Base):
 
     id = Column(Integer, primary_key=True)
     nombre = Column(String(100), nullable=False)
-    email = Column(String(150), unique=True, nullable=False)
+    email = Column(String(150), unique=True, nullable=True)  # Temporalmente nullable
+    password = Column(String(255), nullable=True)  # Temporalmente nullable
     direccion = Column(String, nullable=False)
     telefono = Column(String(20), nullable=False)
     role = Column(String(20), default="cliente")

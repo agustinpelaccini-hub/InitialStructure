@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from src.middlewares.error_middleware import app_error_handler
 from src.routers import (
+    auth_router,
     calificacion_router,
     clientes_router,
     cupones_router,
@@ -55,6 +56,7 @@ async def conflict_handler(request: Request, exc: ConflictError):
 
 API_PREFIX = "/api"
 
+app.include_router(auth_router.router, prefix=API_PREFIX)
 app.include_router(restaurantes_router.router, prefix=API_PREFIX)
 app.include_router(clientes_router.router, prefix=API_PREFIX)
 app.include_router(repartidor_router.router, prefix=API_PREFIX)

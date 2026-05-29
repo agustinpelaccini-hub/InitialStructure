@@ -207,10 +207,14 @@ export function useMarkNotificacion() {
       return data;
     },
     onError: onMutationError,
-    onSuccess: () =>
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["notificaciones"],
+      });
       qc.invalidateQueries({
         queryKey: ["clientes"],
-      }),
+      });
+    },
   });
 }
 

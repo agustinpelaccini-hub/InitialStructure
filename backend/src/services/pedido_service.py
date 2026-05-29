@@ -1,4 +1,7 @@
 from datetime import datetime, timezone
+import random
+import threading
+import time
 
 from sqlalchemy.orm import Session
 
@@ -162,6 +165,8 @@ class PedidoService:
             raise NotFoundError(f"Pedido {pedido_id} no encontrado")
         if pedido.estado in ESTADOS_FINALES:
             raise BadRequestError("No se puede asignar repartidor a un pedido finalizado")
+        if pedido.estado == "cancelado":
+            raise BadRequestError("No se puede asignar repartidor a un pedido cancelado")
 
         if repartidor_id:
             # Asignación manual de repartidor específico
@@ -169,7 +174,8 @@ class PedidoService:
             if not rep:
                 raise NotFoundError(f"Repartidor {repartidor_id} no encontrado")
             self.repartidor_repo.update(rep.id, disponible=False)
-            pedido = self.repo.update(pedido_id, repartidor_id=rep.id)
+            pedido = self.repo.update(pedido_id, repartidor_id=rep.id, estado="en_camino")
+            self._programar_entrega(pedido_id, rep.id)
             return self._to_dto(pedido)
 
         # Asignación automática de repartidor disponible
@@ -181,8 +187,27 @@ class PedidoService:
 
         rep = disponibles[0]
         self.repartidor_repo.update(rep.id, disponible=False)
-        pedido = self.repo.update(pedido_id, repartidor_id=rep.id)
+        pedido = self.repo.update(pedido_id, repartidor_id=rep.id, estado="en_camino")
+        self._programar_entrega(pedido_id, rep.id)
         return self._to_dto(pedido)
+
+    def _programar_entrega(self, pedido_id: int, repartidor_id: int):
+        """Programa la entrega automática del pedido después de 1-3 minutos"""
+        tiempo_entrega = random.randint(60, 180)  # 1-3 minutos en segundos
+
+        def marcar_entregado():
+            time.sleep(tiempo_entrega)
+            try:
+                pedido = self.repo.find_by_id(pedido_id)
+                if pedido and pedido.estado == "en_camino":
+                    self.repo.update(pedido_id, estado="entregado")
+                    self.repartidor_repo.update(repartidor_id, disponible=True)
+                    self.notif_repo.create(pedido_id, "entregado")
+            except Exception:
+                pass  # Ignorar errores en el hilo de background
+
+        thread = threading.Thread(target=marcar_entregado, daemon=True)
+        thread.start()
 
     def cambiar_estado(self, pedido_id: int, nuevo_estado: str) -> dict:
         pedido = self.repo.find_by_id(pedido_id)

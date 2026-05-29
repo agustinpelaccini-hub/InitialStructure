@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZonasRouteImport } from './routes/zonas'
+import { Route as RestauranteDashboardRouteImport } from './routes/restaurante-dashboard'
 import { Route as ReportesRouteImport } from './routes/reportes'
 import { Route as RepartidoresRouteImport } from './routes/repartidores'
 import { Route as RepartidorDashboardRouteImport } from './routes/repartidor-dashboard'
@@ -23,14 +24,23 @@ import { Route as MiRestauranteRouteImport } from './routes/mi-restaurante'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CuponesRouteImport } from './routes/cupones'
 import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as ClienteDashboardRouteImport } from './routes/cliente-dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RestaurantesIndexRouteImport } from './routes/restaurantes.index'
 import { Route as RestaurantesIdRouteImport } from './routes/restaurantes.$id'
+import { Route as RepartidoresIdRouteImport } from './routes/repartidores.$id'
 import { Route as MiRestaurantePedidosRouteImport } from './routes/mi-restaurante.pedidos'
+import { Route as ClientesIdRouteImport } from './routes/clientes.$id'
+import { Route as RestaurantesIdPanelRouteImport } from './routes/restaurantes.$id.panel'
 
 const ZonasRoute = ZonasRouteImport.update({
   id: '/zonas',
   path: '/zonas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestauranteDashboardRoute = RestauranteDashboardRouteImport.update({
+  id: '/restaurante-dashboard',
+  path: '/restaurante-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportesRoute = ReportesRouteImport.update({
@@ -98,6 +108,11 @@ const ClientesRoute = ClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClienteDashboardRoute = ClienteDashboardRouteImport.update({
+  id: '/cliente-dashboard',
+  path: '/cliente-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -113,15 +128,31 @@ const RestaurantesIdRoute = RestaurantesIdRouteImport.update({
   path: '/restaurantes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RepartidoresIdRoute = RepartidoresIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => RepartidoresRoute,
+} as any)
 const MiRestaurantePedidosRoute = MiRestaurantePedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
   getParentRoute: () => MiRestauranteRoute,
 } as any)
+const ClientesIdRoute = ClientesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ClientesRoute,
+} as any)
+const RestaurantesIdPanelRoute = RestaurantesIdPanelRouteImport.update({
+  id: '/panel',
+  path: '/panel',
+  getParentRoute: () => RestaurantesIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/clientes': typeof ClientesRoute
+  '/cliente-dashboard': typeof ClienteDashboardRoute
+  '/clientes': typeof ClientesRouteWithChildren
   '/cupones': typeof CuponesRoute
   '/login': typeof LoginRoute
   '/mi-restaurante': typeof MiRestauranteRouteWithChildren
@@ -132,16 +163,21 @@ export interface FileRoutesByFullPath {
   '/pedidos': typeof PedidosRoute
   '/rankings': typeof RankingsRoute
   '/repartidor-dashboard': typeof RepartidorDashboardRoute
-  '/repartidores': typeof RepartidoresRoute
+  '/repartidores': typeof RepartidoresRouteWithChildren
   '/reportes': typeof ReportesRoute
+  '/restaurante-dashboard': typeof RestauranteDashboardRoute
   '/zonas': typeof ZonasRoute
+  '/clientes/$id': typeof ClientesIdRoute
   '/mi-restaurante/pedidos': typeof MiRestaurantePedidosRoute
-  '/restaurantes/$id': typeof RestaurantesIdRoute
+  '/repartidores/$id': typeof RepartidoresIdRoute
+  '/restaurantes/$id': typeof RestaurantesIdRouteWithChildren
   '/restaurantes/': typeof RestaurantesIndexRoute
+  '/restaurantes/$id/panel': typeof RestaurantesIdPanelRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/clientes': typeof ClientesRoute
+  '/cliente-dashboard': typeof ClienteDashboardRoute
+  '/clientes': typeof ClientesRouteWithChildren
   '/cupones': typeof CuponesRoute
   '/login': typeof LoginRoute
   '/mi-restaurante': typeof MiRestauranteRouteWithChildren
@@ -152,17 +188,22 @@ export interface FileRoutesByTo {
   '/pedidos': typeof PedidosRoute
   '/rankings': typeof RankingsRoute
   '/repartidor-dashboard': typeof RepartidorDashboardRoute
-  '/repartidores': typeof RepartidoresRoute
+  '/repartidores': typeof RepartidoresRouteWithChildren
   '/reportes': typeof ReportesRoute
+  '/restaurante-dashboard': typeof RestauranteDashboardRoute
   '/zonas': typeof ZonasRoute
+  '/clientes/$id': typeof ClientesIdRoute
   '/mi-restaurante/pedidos': typeof MiRestaurantePedidosRoute
-  '/restaurantes/$id': typeof RestaurantesIdRoute
+  '/repartidores/$id': typeof RepartidoresIdRoute
+  '/restaurantes/$id': typeof RestaurantesIdRouteWithChildren
   '/restaurantes': typeof RestaurantesIndexRoute
+  '/restaurantes/$id/panel': typeof RestaurantesIdPanelRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/clientes': typeof ClientesRoute
+  '/cliente-dashboard': typeof ClienteDashboardRoute
+  '/clientes': typeof ClientesRouteWithChildren
   '/cupones': typeof CuponesRoute
   '/login': typeof LoginRoute
   '/mi-restaurante': typeof MiRestauranteRouteWithChildren
@@ -173,17 +214,22 @@ export interface FileRoutesById {
   '/pedidos': typeof PedidosRoute
   '/rankings': typeof RankingsRoute
   '/repartidor-dashboard': typeof RepartidorDashboardRoute
-  '/repartidores': typeof RepartidoresRoute
+  '/repartidores': typeof RepartidoresRouteWithChildren
   '/reportes': typeof ReportesRoute
+  '/restaurante-dashboard': typeof RestauranteDashboardRoute
   '/zonas': typeof ZonasRoute
+  '/clientes/$id': typeof ClientesIdRoute
   '/mi-restaurante/pedidos': typeof MiRestaurantePedidosRoute
-  '/restaurantes/$id': typeof RestaurantesIdRoute
+  '/repartidores/$id': typeof RepartidoresIdRoute
+  '/restaurantes/$id': typeof RestaurantesIdRouteWithChildren
   '/restaurantes/': typeof RestaurantesIndexRoute
+  '/restaurantes/$id/panel': typeof RestaurantesIdPanelRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cliente-dashboard'
     | '/clientes'
     | '/cupones'
     | '/login'
@@ -197,13 +243,18 @@ export interface FileRouteTypes {
     | '/repartidor-dashboard'
     | '/repartidores'
     | '/reportes'
+    | '/restaurante-dashboard'
     | '/zonas'
+    | '/clientes/$id'
     | '/mi-restaurante/pedidos'
+    | '/repartidores/$id'
     | '/restaurantes/$id'
     | '/restaurantes/'
+    | '/restaurantes/$id/panel'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cliente-dashboard'
     | '/clientes'
     | '/cupones'
     | '/login'
@@ -217,13 +268,18 @@ export interface FileRouteTypes {
     | '/repartidor-dashboard'
     | '/repartidores'
     | '/reportes'
+    | '/restaurante-dashboard'
     | '/zonas'
+    | '/clientes/$id'
     | '/mi-restaurante/pedidos'
+    | '/repartidores/$id'
     | '/restaurantes/$id'
     | '/restaurantes'
+    | '/restaurantes/$id/panel'
   id:
     | '__root__'
     | '/'
+    | '/cliente-dashboard'
     | '/clientes'
     | '/cupones'
     | '/login'
@@ -237,15 +293,20 @@ export interface FileRouteTypes {
     | '/repartidor-dashboard'
     | '/repartidores'
     | '/reportes'
+    | '/restaurante-dashboard'
     | '/zonas'
+    | '/clientes/$id'
     | '/mi-restaurante/pedidos'
+    | '/repartidores/$id'
     | '/restaurantes/$id'
     | '/restaurantes/'
+    | '/restaurantes/$id/panel'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ClientesRoute: typeof ClientesRoute
+  ClienteDashboardRoute: typeof ClienteDashboardRoute
+  ClientesRoute: typeof ClientesRouteWithChildren
   CuponesRoute: typeof CuponesRoute
   LoginRoute: typeof LoginRoute
   MiRestauranteRoute: typeof MiRestauranteRouteWithChildren
@@ -256,10 +317,11 @@ export interface RootRouteChildren {
   PedidosRoute: typeof PedidosRoute
   RankingsRoute: typeof RankingsRoute
   RepartidorDashboardRoute: typeof RepartidorDashboardRoute
-  RepartidoresRoute: typeof RepartidoresRoute
+  RepartidoresRoute: typeof RepartidoresRouteWithChildren
   ReportesRoute: typeof ReportesRoute
+  RestauranteDashboardRoute: typeof RestauranteDashboardRoute
   ZonasRoute: typeof ZonasRoute
-  RestaurantesIdRoute: typeof RestaurantesIdRoute
+  RestaurantesIdRoute: typeof RestaurantesIdRouteWithChildren
   RestaurantesIndexRoute: typeof RestaurantesIndexRoute
 }
 
@@ -270,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/zonas'
       fullPath: '/zonas'
       preLoaderRoute: typeof ZonasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restaurante-dashboard': {
+      id: '/restaurante-dashboard'
+      path: '/restaurante-dashboard'
+      fullPath: '/restaurante-dashboard'
+      preLoaderRoute: typeof RestauranteDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reportes': {
@@ -363,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cliente-dashboard': {
+      id: '/cliente-dashboard'
+      path: '/cliente-dashboard'
+      fullPath: '/cliente-dashboard'
+      preLoaderRoute: typeof ClienteDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -384,6 +460,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RestaurantesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/repartidores/$id': {
+      id: '/repartidores/$id'
+      path: '/$id'
+      fullPath: '/repartidores/$id'
+      preLoaderRoute: typeof RepartidoresIdRouteImport
+      parentRoute: typeof RepartidoresRoute
+    }
     '/mi-restaurante/pedidos': {
       id: '/mi-restaurante/pedidos'
       path: '/pedidos'
@@ -391,8 +474,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MiRestaurantePedidosRouteImport
       parentRoute: typeof MiRestauranteRoute
     }
+    '/clientes/$id': {
+      id: '/clientes/$id'
+      path: '/$id'
+      fullPath: '/clientes/$id'
+      preLoaderRoute: typeof ClientesIdRouteImport
+      parentRoute: typeof ClientesRoute
+    }
+    '/restaurantes/$id/panel': {
+      id: '/restaurantes/$id/panel'
+      path: '/panel'
+      fullPath: '/restaurantes/$id/panel'
+      preLoaderRoute: typeof RestaurantesIdPanelRouteImport
+      parentRoute: typeof RestaurantesIdRoute
+    }
   }
 }
+
+interface ClientesRouteChildren {
+  ClientesIdRoute: typeof ClientesIdRoute
+}
+
+const ClientesRouteChildren: ClientesRouteChildren = {
+  ClientesIdRoute: ClientesIdRoute,
+}
+
+const ClientesRouteWithChildren = ClientesRoute._addFileChildren(
+  ClientesRouteChildren,
+)
 
 interface MiRestauranteRouteChildren {
   MiRestaurantePedidosRoute: typeof MiRestaurantePedidosRoute
@@ -406,9 +515,34 @@ const MiRestauranteRouteWithChildren = MiRestauranteRoute._addFileChildren(
   MiRestauranteRouteChildren,
 )
 
+interface RepartidoresRouteChildren {
+  RepartidoresIdRoute: typeof RepartidoresIdRoute
+}
+
+const RepartidoresRouteChildren: RepartidoresRouteChildren = {
+  RepartidoresIdRoute: RepartidoresIdRoute,
+}
+
+const RepartidoresRouteWithChildren = RepartidoresRoute._addFileChildren(
+  RepartidoresRouteChildren,
+)
+
+interface RestaurantesIdRouteChildren {
+  RestaurantesIdPanelRoute: typeof RestaurantesIdPanelRoute
+}
+
+const RestaurantesIdRouteChildren: RestaurantesIdRouteChildren = {
+  RestaurantesIdPanelRoute: RestaurantesIdPanelRoute,
+}
+
+const RestaurantesIdRouteWithChildren = RestaurantesIdRoute._addFileChildren(
+  RestaurantesIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ClientesRoute: ClientesRoute,
+  ClienteDashboardRoute: ClienteDashboardRoute,
+  ClientesRoute: ClientesRouteWithChildren,
   CuponesRoute: CuponesRoute,
   LoginRoute: LoginRoute,
   MiRestauranteRoute: MiRestauranteRouteWithChildren,
@@ -419,10 +553,11 @@ const rootRouteChildren: RootRouteChildren = {
   PedidosRoute: PedidosRoute,
   RankingsRoute: RankingsRoute,
   RepartidorDashboardRoute: RepartidorDashboardRoute,
-  RepartidoresRoute: RepartidoresRoute,
+  RepartidoresRoute: RepartidoresRouteWithChildren,
   ReportesRoute: ReportesRoute,
+  RestauranteDashboardRoute: RestauranteDashboardRoute,
   ZonasRoute: ZonasRoute,
-  RestaurantesIdRoute: RestaurantesIdRoute,
+  RestaurantesIdRoute: RestaurantesIdRouteWithChildren,
   RestaurantesIndexRoute: RestaurantesIndexRoute,
 }
 export const routeTree = rootRouteImport

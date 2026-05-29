@@ -61,7 +61,6 @@ function PedidosRecibidos() {
                     <TableCell><span className={`text-xs px-2 py-1 rounded-full font-medium ${estadoColor[p.estado]}`}>{p.estado.replace("_"," ")}</span></TableCell>
                     <TableCell className="text-right font-semibold">${p.total.toLocaleString()}</TableCell>
                     <TableCell className="space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => updateEstado.mutate({ id: p.id, estado: "confirmado" })}>Confirmar</Button>
                         <Button size="sm" variant="ghost" onClick={() => updateEstado.mutate({ id: p.id, estado: "cancelado" })}>Cancelar</Button>
                     </TableCell>
                   </TableRow>

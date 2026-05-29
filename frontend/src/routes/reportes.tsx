@@ -4,7 +4,7 @@ import { AppShell, PageHeader, EndpointHint } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { mockRestaurantes } from "@/lib/mock-data";
+import { useRestaurantes } from "@/hooks/apiHooks";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
@@ -13,10 +13,13 @@ export const Route = createFileRoute("/reportes")({
 });
 
 function ReportesPage() {
+  const restaurantesQuery = useRestaurantes();
   const [desde, setDesde] = useState("2026-05-01");
   const [hasta, setHasta] = useState("2026-05-08");
   const [restId, setRestId] = useState(1);
   const [generar, setGenerar] = useState(false);
+
+  const restaurantes = restaurantesQuery.data ?? [];
 
   const reporteQuery = useQuery({
     queryKey: ["reporte", restId, desde, hasta],
@@ -55,7 +58,7 @@ function ReportesPage() {
           <div>
             <label className="text-xs font-medium text-muted-foreground">Restaurante</label>
             <select className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm" value={restId} onChange={e=>setRestId(Number(e.target.value))}>
-              {mockRestaurantes.map(r => <option key={r.id} value={r.id}>{r.nombre}</option>)}
+              {restaurantes.map((r: { id: number; nombre: string }) => <option key={r.id} value={r.id}>{r.nombre}</option>)}
             </select>
           </div>
           <div>
